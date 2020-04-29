@@ -3,16 +3,17 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 
+max_sensor_num = 30
 sensorName=('MANUAL_TRAY','MAIN_TRAY','SECOND_TRAY','THIRD_TRAY','FOURTH_TRAY','PAPER_DETECT_1','PAPER_DETECT_2',
 'MAIN_FEED','DESKEW','REGISTRATION','REGISTRATION2','OPC_JAM','FUSER_OUT','EXIT','DUPLEX','FRONT_COVER',       
 'REAR_COVER','DUPLEX_COVER','NEAR_EMPTY','TRAY1_COVER','TRAY1_CAPACITY','LIFTUP','PICKUP_CHECK','SECOND_TRAY_PAPER_OUT',
-'THIRD_TRAY_PAPER_OUT','FOURTH_TRAY_PAPER_OUT','EXIT_CAPACITY','S27', 'S28', 'S29')
+'THIRD_TRAY_PAPER_OUT','FOURTH_TRAY_PAPER_OUT','EXIT_CAPACITY','MANUAL_TRAY_PAPER_SIZE', 'MAIN_TRAY_PAPER_SIZE', 'S29')
 
 _lineNum = 0
 _curTime = 0
 
-sensorTimeX = [[] for _ in range(30)]
-sensorPosY = [[] for _ in range(30)]
+sensorTimeX = [[] for _ in range(max_sensor_num)]
+sensorPosY = [[] for _ in range(max_sensor_num)]
 sensorName2id = {}
 id = 0
 for name in sensorName:
@@ -51,9 +52,18 @@ def CheckSensor(m):
 	if _curTime == 0:		
 		print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))
 
-	_curTime = float(m3time)/1000.0
-	sensorId = sensorName2id[sensorId]
-	sensorStatus = stateName2id[sensorStatus]
+	if sensorId in sensorName2id:
+		sensorId = sensorName2id[sensorId]
+	else:
+		#print("%40s %6s %8s %12s %12s" % (sensorId, "XXX", "XXX","XXX","XXX"))
+		return None	
+	if sensorStatus in stateName2id:
+		sensorStatus = stateName2id[sensorStatus]
+	else:
+		#print("%40s %6s %8s %12s %12s" % ("XXX", "XX", sensorStatus,"XXX","XXX"))
+		return None	
+		
+	_curTime = float(m3time)/1000.0		
 	RecordSensorInfo(sensorId, sensorStatus, m3time)
 
 def SearchLog(f, patterns):
@@ -69,15 +79,15 @@ def SearchLog(f, patterns):
 
 if __name__ == '__main__':	
 	patterns = [						
-			(re.compile(r'UpdatePrinterSensorStatus:\d+\(Time:(\d+)\) : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+)'), ShowSensor),
+			#(re.compile(r'UpdatePrinterSensorStatus:\d+\(Time:(\d+)\) : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+)'), ShowSensor),
 			(re.compile(r'PRINTER_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckSensor),
 			]
 	
 	SearchLog(sys.stdin, patterns)
 	my_dpi = 96
 	plt.figure(figsize=(2048/my_dpi, 1024/my_dpi), dpi=my_dpi)
-	lineNum = 30
-	for i in range(30):
+	lineNum = max_sensor_num
+	for i in range(max_sensor_num):
 		if len(sensorTimeX[i]) > 1:
 			sensorPosY[i] = list(np.asarray(sensorPosY[i])*8+lineNum*10)
 			plt.plot(sensorTimeX[i], sensorPosY[i], label=sensorName[i])

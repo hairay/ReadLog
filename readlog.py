@@ -116,6 +116,21 @@ def PostPaperJamErr(m):
 	diff = GetMsTimeFromStart(time , _jobIdTime[job])
 	print("[%8d][%8d][ %6d ] PostPaperJamErr [tray%1d autoSel:%d paper:%2d loc:%s job:%3d]" % (time, diff, _lineNum, id, autoSel, paper, loc, job))
 
+def PostNoMatchPaper(m):	
+	param2, param3, param4, time = m.groups()
+	time = int(time)		
+	param2 = int(param2,16)
+	job = (param2 >> 16) & 0xFF
+	id = (param2 >> 8) & 0xFF
+	autoSel = (param2) & 0xFF
+
+	param3 = int(param3,16)
+	
+	paper = (param3 >> 16) & 0xFF
+	
+	diff = GetMsTimeFromStart(time , _jobIdTime[job])
+	print("[%8d][%8d][ %6d ] PostNoMatchPaper [tray%1d autoSel:%d paper:%2d job:%3d]" % (time, diff, _lineNum, id, autoSel, paper, job))
+
 def SysReqPrint(m):	
 	reqMsg, param2, param3, param4, time = m.groups()
 	time = int(time)	
@@ -154,6 +169,7 @@ if __name__ == '__main__':
 			(re.compile(r'_ReportTrayInfo_:\d+ : tray (\d+).*paper exist: (\d+).*T\((\d+)\)'), ReportTrayInfo),
 			(re.compile(r'_PostActiveTrayEr: Post EVENT:    ENG_PRINT ---> SYS_MGR     , {ERR E_ACTIVE_TRAY} {(\w+) (\w+) \w+} (\d+)'), PostActiveTrayErr),
 			(re.compile(r'PostJamWithPageS: .*_JAM} {(\w+) (\w+) (\w+)} (\d+)'), PostPaperJamErr),
+			(re.compile(r'PostNoMatchPaper: .*_NO_MATCH_PAPER} {(\w+) (\w+) (\w+)} (\d+)'), PostNoMatchPaper),
 			(re.compile(r'Main Program Start'), RestartMachine),
 			(re.compile(r'DSP_IP_Init'), RestartMachine),
 			]

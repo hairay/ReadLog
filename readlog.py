@@ -86,23 +86,23 @@ def RealProcPageResult(m):
 	print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s]" % (time, diff, _lineNum, id, result, reason))	
 
 def ReportTrayInfo(m):	
-	id, exist, time = m.groups()
+	trayId, exist, time = m.groups()
 	time = int(time)
 	
 	diff = GetMsTimeFromStart(time , _curJobTime)
-	print("[%8d][%8d][ %6d ] ReportTrayInfo [tray%s:%s job:%3d]" % (time, diff, _lineNum, id, exist, _curJobId))
+	print("[%8d][%8d][ %6d ] ReportTrayInfo [tray%s:%s job:%3d]" % (time, diff, _lineNum, trayId, exist, _curJobId))
 
 def PostActiveTrayErr(m):	
 	param2, param3, time = m.groups()
 	time = int(time)
 	autoSel = (int(param2,16) >> 15) & 0x1
-	id = (int(param2,16) >> 16) & 0xFF
+	trayId = (int(param2,16) >> 16) & 0xFF
 	param3 = int(param3,16)
 	job = (param3 >> 24) & 0xFF
 	paper = (param3 >> 16) & 0xFF
 	media = (param3 >> 8) & 0xFF
 	diff = GetMsTimeFromStart(time , _jobIdTime[job])
-	print("[%8d][%8d][ %6d ] PostActiveTrayErr [tray%1d autoSel:%d paper:%2d media:%2d job:%3d]" % (time, diff, _lineNum, id, autoSel, paper, media, job))
+	print("[%8d][%8d][ %6d ] PostActiveTrayErr [tray%1d autoSel:%d paper:%2d media:%2d job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, media, job))
 
 def PostPaperJamErr(m):	
 	loc, param3, param4, time = m.groups()
@@ -112,24 +112,23 @@ def PostPaperJamErr(m):
 	param4 = int(param4,16)
 	autoSel = (param4 >> 8) & 0xFF
 	paper = (param4) & 0xFF
-	id = (param4 >> 16) & 0xFF
+	trayId = (param4 >> 16) & 0xFF
 	diff = GetMsTimeFromStart(time , _jobIdTime[job])
-	print("[%8d][%8d][ %6d ] PostPaperJamErr [tray%1d autoSel:%d paper:%2d loc:%s job:%3d]" % (time, diff, _lineNum, id, autoSel, paper, loc, job))
+	print("[%8d][%8d][ %6d ] PostPaperJamErr [tray%1d autoSel:%d paper:%2d loc:%s job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, loc, job))
 
 def PostNoMatchPaper(m):	
 	param2, param3, param4, time = m.groups()
 	time = int(time)		
 	param2 = int(param2,16)
 	job = (param2 >> 16) & 0xFF
-	id = (param2 >> 8) & 0xFF
+	trayId = (param2 >> 8) & 0xFF
 	autoSel = (param2) & 0xFF
 
-	param3 = int(param3,16)
-	
+	param3 = int(param3,16)	
 	paper = (param3 >> 16) & 0xFF
-	
+	media = (param3 >> 8) & 0xFF
 	diff = GetMsTimeFromStart(time , _jobIdTime[job])
-	print("[%8d][%8d][ %6d ] PostNoMatchPaper [tray%1d autoSel:%d paper:%2d job:%3d]" % (time, diff, _lineNum, id, autoSel, paper, job))
+	print("[%8d][%8d][ %6d ] PostNoMatchPaper [tray%1d autoSel:%d paper:%2d media:%2d job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, media, job))
 
 def SysReqPrint(m):	
 	reqMsg, param2, param3, param4, time = m.groups()

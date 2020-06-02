@@ -2,7 +2,7 @@ import sys
 import re
 import matplotlib.pyplot as plt
 
-debugFp = open("debug.txt", "a")
+debugFp = open("debug.log", "a")
 _lineNum = 0
 _startTime = 0
 _header13 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,envHw,envSw,set3'

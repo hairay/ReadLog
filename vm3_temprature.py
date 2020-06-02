@@ -2,6 +2,7 @@ import sys
 import re
 import matplotlib.pyplot as plt
 
+debugFp = open("debug.txt", "a")
 _lineNum = 0
 _startTime = 0
 _header13 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,envHw,envSw,set3'
@@ -19,6 +20,7 @@ targetY = []
 envY = []
 
 def AssignVal(m):
+	global debugFp
 	now = float(m.groups(0)[0])/1000.0
 
 	if len(timeX) > 0 and timeX[-1] > now:		 
@@ -29,7 +31,9 @@ def AssignVal(m):
 	sideY.append(float(m.groups(0)[5]))
 	targetY.append(float(m.groups(0)[7]))
 	envY.append(float(m.groups(0)[-2]))	
-	#print("%f,%f" % (timeX[-1] , centerY[-1]))	
+	if float(m.groups(0)[-2]) > 50:
+		debugFp.write("error env temp %s line:%d \n" % (m.groups(0)[-2], _lineNum))
+	
 
 def ShowHeatingInfo13(m):	
 	global _startTime
@@ -110,10 +114,6 @@ def SearchLog(f, patterns):
 				proc(match_result)
 				break
 
-#O_TwinColor_Fuser_Action_ISR_ADC_Temp:1347 : [WarmUp], 41, 25, 40, 25, 110, 1058 ms
-#O_TwinColor_Fuser_Action_ISR_ADC_Temp:1698 : [Prepare], 650, 156, 554, 140, 27, 1, 100, 0, 0. 235722 ms
-#O_TwinColor_Fuser_Action_ISR_ADC_Temp:1713 : [Active], 755, 176, 669, 160, 26, 1, 170, 0, 0, 3. 771678 ms
-
 if __name__ == '__main__':	
 	patterns = [													
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo13),
@@ -139,3 +139,5 @@ if __name__ == '__main__':
 	plt.tick_params(axis='both', labelsize=12, color='red')
 	#plt.show()
 	plt.savefig('curve.png', bbox_inches='tight')     # 存檔
+
+debugFp.close()

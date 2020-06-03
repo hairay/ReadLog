@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 debugFp = open("debug.log", "a")
 _lineNum = 0
 _startTime = 0
+_curM3pTime = 0.0
+_startM3pTime = 0.0
 _header13 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,envHw,envSw,set3'
 _header14 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,set3,envHw,envSw,set4'
 _headerTwinColor = 'state,centerHw,centerSw,sideHw,sideSw,envSw,type,targetSw,LampOn,LampOn_Side,time'
@@ -19,14 +21,25 @@ sideY = []
 targetY = []
 envY = []
 
+def RestartM3(m):
+	global _curM3pTime
+	global _startM3pTime
+	
+	#debugFp.write("RestartM3 _startM3pTime:%f _curM3pTime:%f \n" % (_startM3pTime, _curM3pTime))	
+	_startM3pTime = _curM3pTime
+	
 def AssignVal(m):
 	global debugFp
-	now = float(m.groups(0)[0])/1000.0
+	global _curM3pTime
+	global _startM3pTime
+
+	now = float(m.groups(0)[0])/1000.0 + _startM3pTime
 
 	if len(timeX) > 0 and timeX[-1] > now:		 
 			return None
 
-	timeX.append(now)
+	_curM3pTime = now
+	timeX.append(now)	
 	centerY.append(float(m.groups(0)[3]))
 	sideY.append(float(m.groups(0)[5]))
 	targetY.append(float(m.groups(0)[7]))
@@ -103,6 +116,7 @@ def ShowHeatingInfoMice(m):
 	targetY.append(float(m.groups(0)[12]))
 	envY.append(float(m.groups(0)[6]))
 
+
 def SearchLog(f, patterns):
 	global _lineNum
 	for line in f:   
@@ -123,6 +137,7 @@ if __name__ == '__main__':
 			(re.compile(r'O_TwinColor_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) ms'), ShowHeatingInfoTwinColor),
 			(re.compile(r'O_MICE_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], \((\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\) gFuserTargetTemp=(\d+), (\d+) ms'), ShowHeatingInfoMice),
 			(re.compile(r'O_MICE_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], \((\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\) gFuserTargetTemp=(\d+),Nip=(\d+), (\d+) ms'), ShowHeatingInfoMice),
+			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
 			]
 	SearchLog(sys.stdin, patterns)
 	my_dpi = 96

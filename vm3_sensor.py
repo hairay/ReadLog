@@ -11,6 +11,7 @@ sensorName=('MANUAL_TRAY','MAIN_TRAY','SECOND_TRAY','THIRD_TRAY','FOURTH_TRAY','
 
 _lineNum = 0
 _curTime = 0
+_startM3pTime = 0.0
 
 sensorTimeX = [[] for _ in range(max_sensor_num)]
 sensorPosY = [[] for _ in range(max_sensor_num)]
@@ -21,6 +22,14 @@ for name in sensorName:
 	sensorName2id[name] = id
 	id += 1
 stateName2id = {'NO_PAPER':0, 'HAS_PAPER':1, 'COVER_OPEN':1, 'COVER_CLOSE':0}
+
+
+def RestartM3(m):
+	global _curTime
+	global _startM3pTime
+	
+	#debugFp.write("RestartM3 _startM3pTime:%f _curM3pTime:%f \n" % (_startM3pTime, _curM3pTime))	
+	_startM3pTime = _curTime
 
 def RecordSensorInfo(sensorId, sensorStatus, m3time):
 	print("%40s %6d %8s %12s %12s" % (sensorName[sensorId], sensorId, sensorStatus,int(m3time)*1000,_lineNum))
@@ -40,7 +49,7 @@ def ShowSensor(m):
 	if _curTime == 0:		
 		print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))
 
-	_curTime = float(m3time)/1000.0
+	_curTime = float(m3time)/1000.0 + _startM3pTime
 	sensorId = int(sensorId)
 	sensorStatus = int(sensorStatus)
 	RecordSensorInfo(sensorId, sensorStatus, m3time)
@@ -63,7 +72,7 @@ def CheckSensor(m):
 		#print("%40s %6s %8s %12s %12s" % ("XXX", "XX", sensorStatus,"XXX","XXX"))
 		return None	
 		
-	_curTime = float(m3time)/1000.0		
+	_curTime = float(m3time)/1000.0 + _startM3pTime		
 	RecordSensorInfo(sensorId, sensorStatus, m3time)
 
 def SearchLog(f, patterns):
@@ -81,6 +90,7 @@ if __name__ == '__main__':
 	patterns = [						
 			#(re.compile(r'UpdatePrinterSensorStatus:\d+\(Time:(\d+)\) : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+)'), ShowSensor),
 			(re.compile(r'PRINTER_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckSensor),
+			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
 			]
 	
 	SearchLog(sys.stdin, patterns)

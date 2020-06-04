@@ -12,6 +12,8 @@ sensorName=('MANUAL_TRAY','MAIN_TRAY','SECOND_TRAY','THIRD_TRAY','FOURTH_TRAY','
 _lineNum = 0
 _curTime = 0
 _startM3pTime = 0.0
+sCurM3Time = 0
+sStartM3Time = 0
 
 sensorTimeX = [[] for _ in range(max_sensor_num)]
 sensorPosY = [[] for _ in range(max_sensor_num)]
@@ -27,12 +29,18 @@ stateName2id = {'NO_PAPER':0, 'HAS_PAPER':1, 'COVER_OPEN':1, 'COVER_CLOSE':0}
 def RestartM3(m):
 	global _curTime
 	global _startM3pTime
-	
+	global sCurM3Time
+	global sStartM3Time
 	#debugFp.write("RestartM3 _startM3pTime:%f _curM3pTime:%f \n" % (_startM3pTime, _curM3pTime))	
 	_startM3pTime = _curTime
+	sStartM3Time = sCurM3Time
 
 def RecordSensorInfo(sensorId, sensorStatus, m3time):
-	print("%40s %6d %8s %12s %12s" % (sensorName[sensorId], sensorId, sensorStatus,int(m3time)*1000,_lineNum))
+	global sCurM3Time
+	global sStartM3Time
+
+	sCurM3Time = int(m3time) + sStartM3Time
+	print("%40s %6d %8s %12s %12s" % (sensorName[sensorId], sensorId, sensorStatus,int(sCurM3Time)*1000,_lineNum))
 	if len(sensorTimeX[sensorId]) > 0 and sensorTimeX[sensorId][-1] >= _curTime:
 			return None	
 	

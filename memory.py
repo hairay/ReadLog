@@ -8,14 +8,14 @@ virAddr2Size = {}
 
 def MemMgrMalloc(m):	
 	phyAddr, size = m.groups()
-	phyAddr2Size[phyAddr] = size
+	phyAddr2Size[phyAddr] = [size, _lineNum]
 	
 
 def MemMgrFree(m):	
 	phyAddr, size = m.groups()
 	
 	if phyAddr in phyAddr2Size:
-		if phyAddr2Size[phyAddr] != size:
+		if phyAddr2Size[phyAddr][0] != size:
 			print("[ %6d ] MemMgrFree phyAddr:%s size:%s != original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 		del phyAddr2Size[phyAddr]    
 	else:		
@@ -23,7 +23,7 @@ def MemMgrFree(m):
 
 def PhyMemToVirMem(m):	
 	phyAddr, size, virPtr = m.groups()
-	virAddr2Size[virPtr] = size
+	virAddr2Size[virPtr] = [size, _lineNum]
 	if phyAddr not in phyAddr2Size:
 		print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
 
@@ -31,7 +31,7 @@ def ReleaseMapVirMem(m):
 	virPtr, size = m.groups()
 	
 	if virPtr in virAddr2Size:
-		if virAddr2Size[virPtr] != size:
+		if virAddr2Size[virPtr][0] != size:
 			print("[ %6d ] ReleaseMapVirMem virAddr:%s size:%s != original size:%s" % (_lineNum, virPtr, size, virAddr2Size[virPtr]))
 		del virAddr2Size[virPtr]    
 	else:		

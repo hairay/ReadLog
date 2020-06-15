@@ -7,12 +7,12 @@ phyAddr2Size = {}
 virAddr2Size = {}
 
 def MemMgrMalloc(m):	
-	phyAddr, size, free = m.groups()
+	phyAddr, size = m.groups()
 	phyAddr2Size[phyAddr] = size
 	
 
 def MemMgrFree(m):	
-	phyAddr, size, free = m.groups()
+	phyAddr, size = m.groups()
 	
 	if phyAddr in phyAddr2Size:
 		if phyAddr2Size[phyAddr] != size:
@@ -25,7 +25,7 @@ def PhyMemToVirMem(m):
 	phyAddr, size, virPtr = m.groups()
 	virAddr2Size[virPtr] = size
 	if phyAddr not in phyAddr2Size:
-		print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s" % (_lineNum, phyAddr, size))
+		print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
 
 def ReleaseMapVirMem(m):	
 	virPtr, size = m.groups()
@@ -48,15 +48,10 @@ def SearchLog(f, patterns):
 				proc(match_result)
 				break
 
-#MemMgrMalloc Ptr=0xa98e0000 size=4349952 gFreeMemSize=103784448
-#MemMgrFree Free Ptr=0xa9d06000 size=4349952 gFreeMemSize=103784448
-#__PhyMemToVirMem:0130(Time:7734) : gMiscellaneousThread: phyPtr = 0x80e00000 size=8192 vPtr=0xabb9d000
-#ReleaseMapVirMem:0217(Time:47230) : AppCopy_JobTask: vPtr = 0xa92e2000 size=4349952
-
 if __name__ == '__main__':	
 	patterns = [						
-			(re.compile(r'MemMgrMalloc Ptr=(\w+) size=(\d+) gFreeMemSize=(\d+)'), MemMgrMalloc),
-            (re.compile(r'MemMgrFree Free Ptr=(\w+) size=(\d+) gFreeMemSize=(\d+)'), MemMgrFree),	
+			(re.compile(r'MemMgrMalloc Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrMalloc),
+            (re.compile(r'MemMgrFree Free Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrFree),	
             (re.compile(r'__PhyMemToVirMem:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+) vPtr=(\w+)'), PhyMemToVirMem),
             (re.compile(r'ReleaseMapVirMem:\d+\(Time:\d+\) : .*vPtr = (\w+) size=(\d+)'), ReleaseMapVirMem),			
 			]

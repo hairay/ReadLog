@@ -35,9 +35,10 @@ def AssignVal(m):
 
 	now = float(m.groups(0)[0])/1000.0 + _startM3pTime
 
-	if len(timeX) > 0 and timeX[-1] > now:		 
+	if len(timeX) > 0 and timeX[-1] > now:					
+			debugFp.write("wrong procedure now:%f  previous:%f line:%d \n" % (now, timeX[-1], _lineNum)) 
 			return None
-
+	
 	_curM3pTime = now
 	timeX.append(now)	
 	centerY.append(float(m.groups(0)[3]))

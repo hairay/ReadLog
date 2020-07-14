@@ -14,6 +14,7 @@ _headerTwinColor12 = 'state,centerHw,centerSw,sideHw,sideSw,envSw,type,targetSw,
 _headerTwinColor7 = 'state,centerHw,centerSw,sideHw,sideSw,targetSw,time'
 _headerMice14 = 'state,centerHw,centerSw,sideHw,sideSw,envHw,envSw,EnvFuserError,EnvType,mode1,mode2,SideTherCheck,targetSw,time'
 _headerMice15 = 'state,centerHw,centerSw,sideHw,sideSw,envHw,envSw,EnvFuserError,EnvType,mode1,mode2,SideTherCheck,targetSw,PaperNip,time'
+_headerPanther = 'sideSw,centerSw,targetSw1,targetSw2,time1,time2'
 
 timeX = []
 centerY = []
@@ -118,6 +119,26 @@ def ShowHeatingInfoMice(m):
 	envY.append(float(m.groups(0)[6]))
 
 
+def ShowHeatingInfoPanther(m):
+	global _startTime		
+	if _startTime == 0:		
+			print(_headerPanther)
+	_startTime = float(m.groups(0)[-2])/1000.0
+	
+	print("%s,%s,%s,%s,%s,%s" % (m.groups()))
+	
+	now = float(m.groups(0)[-2])/1000.0
+
+	if len(timeX) > 0 and timeX[-1] > now:		 
+			return None
+
+	timeX.append(now)
+	centerY.append(float(m.groups(0)[1]))
+	sideY.append(float(m.groups(0)[0]))
+	
+	targetY.append(float(m.groups(0)[2]))
+	
+
 def SearchLog(f, patterns):
 	global _lineNum
 	for line in f:   
@@ -129,6 +150,8 @@ def SearchLog(f, patterns):
 				proc(match_result)
 				break
 
+#2901: [Fuser] State = 0(Initial), (TempA3, TempA4, gCtrlTempA3, gCtrlTempA4) = /185/192/0/0/ T(1936, 2194)
+
 if __name__ == '__main__':	
 	patterns = [													
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo13),
@@ -138,6 +161,7 @@ if __name__ == '__main__':
 			(re.compile(r'O_TwinColor_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) ms'), ShowHeatingInfoTwinColor),
 			(re.compile(r'O_MICE_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], \((\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\) gFuserTargetTemp=(\d+), (\d+) ms'), ShowHeatingInfoMice),
 			(re.compile(r'O_MICE_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], \((\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\) gFuserTargetTemp=(\d+),Nip=(\d+), (\d+) ms'), ShowHeatingInfoMice),
+			(re.compile(r'\(TempA3, TempA4, gCtrlTempA3, gCtrlTempA4\) = /(\d+)/(\d+)/(\d+)/(\d+)/ T\((\d+), (\d+)\)'), ShowHeatingInfoPanther),
 			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
 			]
 	SearchLog(sys.stdin, patterns)

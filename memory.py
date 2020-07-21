@@ -29,6 +29,20 @@ def PhyMemToVirMem(m):
 	elif phyAddr2Size[phyAddr][0] != size:
 		print("[ %6d ] PhyMemToVirMem phyAddr:%s size:%s != original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 
+def InvadateCache(m):	
+	phyAddr, size = m.groups()	
+	if phyAddr not in phyAddr2Size:
+		print("[ %6d ] InvadateCache can't find MemMgrMalloc phyAddr:%s size:%s" % (_lineNum, phyAddr, size))
+	elif phyAddr2Size[phyAddr][0] != size:
+		print("[ %6d ] InvadateCache phyAddr:%s size:%s != original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
+
+def FlushCache(m):	
+	phyAddr, size = m.groups()	
+	if phyAddr not in phyAddr2Size:
+		print("[ %6d ] FlushCache can't find MemMgrMalloc phyAddr:%s size:%s" % (_lineNum, phyAddr, size))
+	elif phyAddr2Size[phyAddr][0] != size:
+		print("[ %6d ] FlushCache phyAddr:%s size:%s != original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
+
 def ReleaseMapVirMem(m):	
 	virPtr, size = m.groups()
 	
@@ -55,6 +69,8 @@ if __name__ == '__main__':
 			(re.compile(r'MemMgrMalloc Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrMalloc),
             (re.compile(r'MemMgrFree Free Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrFree),	
             (re.compile(r'__PhyMemToVirMem:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+) vPtr=(\w+)'), PhyMemToVirMem),
+			(re.compile(r'InvadateCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), InvadateCache),
+			(re.compile(r'FlushCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), FlushCache),
             (re.compile(r'ReleaseMapVirMem:\d+\(Time:\d+\) : .*vPtr = (\w+) size=(\d+)'), ReleaseMapVirMem),			
 			]
 	

@@ -4,13 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 max_sensor_num = 30
-sensorName=('MANUAL_TRAY','MAIN_TRAY','SECOND_TRAY','THIRD_TRAY','FOURTH_TRAY','PAPER_DETECT_1','PAPER_DETECT_2',
+sensorName=['MANUAL_TRAY','MAIN_TRAY','SECOND_TRAY','THIRD_TRAY','FOURTH_TRAY','PAPER_DETECT_1','PAPER_DETECT_2',
 'MAIN_FEED','DESKEW','REGISTRATION','REGISTRATION2','OPC_JAM','FUSER_OUT','EXIT','DUPLEX','FRONT_COVER',       
 'REAR_COVER','DUPLEX_COVER','NEAR_EMPTY','TRAY1_COVER','TRAY1_CAPACITY','LIFTUP','PICKUP_CHECK','SECOND_TRAY_PAPER_OUT',
-'THIRD_TRAY_PAPER_OUT','FOURTH_TRAY_PAPER_OUT','EXIT_CAPACITY','MANUAL_TRAY_PAPER_SIZE', 'MAIN_TRAY_PAPER_SIZE', 'S29')
+'THIRD_TRAY_PAPER_OUT','FOURTH_TRAY_PAPER_OUT','EXIT_CAPACITY','MANUAL_TRAY_PAPER_SIZE', 'MAIN_TRAY_PAPER_SIZE', 'S29']
 
 _lineNum = 0
 _curTime = 0
+_curSensorId =0
 _startM3pTime = 0.0
 sCurM3Time = 0
 sStartM3Time = 0
@@ -19,8 +20,9 @@ sensorTimeX = [[] for _ in range(max_sensor_num)]
 sensorPosY = [[] for _ in range(max_sensor_num)]
 sensorName2id = {}
 id = 0
+
 for name in sensorName:
-	#print("%d=%s" % (id,name))
+	#print("%d=%s" % (id,name))	
 	sensorName2id[name] = id
 	id += 1
 stateName2id = {'NO_PAPER':0, 'HAS_PAPER':1, 'COVER_OPEN':1, 'COVER_CLOSE':0}
@@ -40,7 +42,7 @@ def RecordSensorInfo(sensorId, sensorStatus, m3time):
 	global sStartM3Time
 
 	sCurM3Time = int(m3time) + sStartM3Time
-	print("%40s %6d %8s %12s %12s" % (sensorName[sensorId], sensorId, sensorStatus,int(sCurM3Time)*1000,_lineNum))
+	print("%40s %6d %8d %12s %12s" % (sensorName[sensorId], sensorId, sensorStatus,int(sCurM3Time)*1000,_lineNum))
 	if len(sensorTimeX[sensorId]) > 0 and sensorTimeX[sensorId][-1] >= _curTime:
 			return None	
 	
@@ -62,12 +64,19 @@ def ShowSensor(m):
 	sensorStatus = int(sensorStatus)
 	RecordSensorInfo(sensorId, sensorStatus, m3time)
 
-def CheckSensor(m):
+def CheckVm3Sensor(m):
 	global _curTime	
-	
+	global _curSensorId
+
 	m3time, sensorId, sensorStatus = m.groups()
 	if _curTime == 0:		
 		print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))
+	_curTime = float(m3time)/1000.0 + _startM3pTime
+
+	if sensorId not in sensorName2id:
+		sensorName[_curSensorId] = sensorId
+		sensorName2id[sensorId] = _curSensorId
+		_curSensorId += 1
 
 	if sensorId in sensorName2id:
 		sensorId = sensorName2id[sensorId]
@@ -79,8 +88,30 @@ def CheckSensor(m):
 	else:
 		#print("%40s %6s %8s %12s %12s" % ("XXX", "XX", sensorStatus,"XXX","XXX"))
 		return None	
-		
-	_curTime = float(m3time)/1000.0 + _startM3pTime		
+				
+	RecordSensorInfo(sensorId, sensorStatus, m3time)
+
+def CheckMiceSensor(m):
+	global _curTime	
+	global _curSensorId
+
+	sensorId, sensorStatus, m3time = m.groups()
+	if _curTime == 0:		
+		print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))
+	_curTime = float(m3time)/1000.0 + _startM3pTime
+
+	if sensorId not in sensorName2id:
+		sensorName[_curSensorId] = sensorId
+		sensorName2id[sensorId] = _curSensorId
+		_curSensorId += 1
+
+	if sensorId in sensorName2id:
+		sensorId = sensorName2id[sensorId]
+	else:
+		#print("%40s %6s %8s %12s %12s" % (sensorId, "XXX", "XXX","XXX","XXX"))
+		return None	
+	
+	sensorStatus = int(sensorStatus)
 	RecordSensorInfo(sensorId, sensorStatus, m3time)
 
 def SearchLog(f, patterns):
@@ -97,8 +128,10 @@ def SearchLog(f, patterns):
 if __name__ == '__main__':	
 	patterns = [						
 			#(re.compile(r'UpdatePrinterSensorStatus:\d+\(Time:(\d+)\) : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+)'), ShowSensor),
-			(re.compile(r'PRINTER_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckSensor),
+			(re.compile(r'PRINTER_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckVm3Sensor),
+			(re.compile(r'Sensor_PrintStatas:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status, RegisterSN\) = \(\d+, (\w+), \d+\). T\((\d+).*\)'), CheckMiceSensor),
 			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
+			(re.compile(r'DSP_IP_Init'), RestartM3)
 			]
 	
 	SearchLog(sys.stdin, patterns)
@@ -107,7 +140,7 @@ if __name__ == '__main__':
 	lineNum = max_sensor_num
 	for i in range(max_sensor_num):
 		if len(sensorTimeX[i]) > 1:
-			sensorPosY[i] = list(np.asarray(sensorPosY[i])*8+lineNum*10)
+			sensorPosY[i] = list(np.asarray(sensorPosY[i])*8+lineNum*10)			
 			plt.plot(sensorTimeX[i], sensorPosY[i], label=sensorName[i])
 			lineNum -= 1
 	
@@ -118,4 +151,4 @@ if __name__ == '__main__':
 	plt.ylabel("sensor pos", fontsize=14)
 	plt.tick_params(axis='both', labelsize=8, color='red')
 	#plt.show()
-	plt.savefig('curve.png', bbox_inches='tight')     # 存檔
+	plt.savefig('curve.png', bbox_inches='tight')

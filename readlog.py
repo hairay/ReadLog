@@ -104,6 +104,13 @@ def PostActiveTrayErr(m):
 	diff = GetMsTimeFromStart(time , _jobIdTime[job])
 	print("[%8d][%8d][ %6d ] PostActiveTrayErr [tray%1d autoSel:%d paper:%2d media:%2d job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, media, job))
 
+def PcuToSys(m):	
+	msg1, msg2, param2, param3, param4, time = m.groups()
+	time = int(time)
+	
+	diff = GetMsTimeFromStart(time , _jobIdTime[_curJobId])
+	print("[%8d][%8d][ %6d ] ENG_PRINT ---> SYS_MGR %s %s param2:%s param3:%s param4:%s" % (time, diff, _lineNum, msg1, msg2, param2, param3, param4))
+
 def PostPaperJamErr(m):	
 	loc, param3, param4, time = m.groups()
 	time = int(time)		
@@ -130,19 +137,12 @@ def PostNoMatchPaper(m):
 	diff = GetMsTimeFromStart(time , _jobIdTime[job])
 	print("[%8d][%8d][ %6d ] PostNoMatchPaper [tray%1d autoSel:%d paper:%2d media:%2d job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, media, job))
 
-def SysReqPrint(m):	
-	reqMsg, param2, param3, param4, time = m.groups()
+def SysToPrint(m):	
+	msg1, reqMsg, param2, param3, param4, time = m.groups()
 	time = int(time)	
 	
 	diff = GetMsTimeFromStart(time , _curJobTime)
-	print("[%8d][%8d][ %6d ] SYS_MGR ---> ENG_PRINT %s %s %s %s" % (time, diff, _lineNum, reqMsg, param2, param3, param4))
-
-def PrintErrToSys(m):	
-	errMsg, param2, param3, param4, time = m.groups()
-	time = int(time)	
-	
-	diff = GetMsTimeFromStart(time , _curJobTime)
-	print("[%8d][%8d][ %6d ] ENG_PRINT ---> SYS_MGR %s %s %s %s" % (time, diff, _lineNum, errMsg, param2, param3, param4))
+	print("[%8d][%8d][ %6d ] SYS_MGR ---> ENG_PRINT %s %s param2:%s param3:%s param4:%s" % (time, diff, _lineNum, msg1, reqMsg, param2, param3, param4))
 
 def McuErrorLog(m):	
 	owner, error, status, param1, param2, gSCState = m.groups()
@@ -163,16 +163,16 @@ def SearchLog(f, patterns):
 if __name__ == '__main__':	
 	patterns = [									
 			(re.compile(r'SysMgrUCO_JobStart.*ppType: (\w+),.*ID: (\d+).*Enter Time: (\d+)'), SysMgrUCO_JobStart),
-			(re.compile(r'JobMgr_JobStart: add new job: .*ID = (\d+), appType = (\w+)'), JobMgr_JobStart),			
+			(re.compile(r'JobMgr_JobStart: add new job: .*ID = (\d+), appType = (\w+)'), JobMgr_JobStart),
             (re.compile(r'_PrintPaperIn:\d+ : Report ENG_FD jobNum: (\d+), PID: (\d+).*T\((\d+)\)'), PrintPaperIn),
 			(re.compile(r'_PrintPage:\d+ :PID: (\d+).*Code: (\d+), T\((\d+)\)'), PrintPage),
 			(re.compile(r'_RealProcPageResult:\d+ : .*ID: (\d+),result: (\w+) reason=([-+]?\d+).*T\((\d+)\)'), RealProcPageResult),
 			(re.compile(r'SysMgrUCO_JobAbortImpl:\d+ : .*ppType: (\w+).*ID: (\d+).*Enter Time: (\d+)'), SysMgrUCO_JobAbort),
-			(re.compile(r'SysMgrUCO_JobEnd:\d+ : .*ppType: (\w+).*ID: (\d+).*Enter Time: (\d+)'), SysMgrUCO_JobEnd),						
-			(re.compile(r'ENG_PRINT ---> SYS_MGR.*ERR (\w+)} {(\w+) (\w+) (\w+)} (\d+)'), PrintErrToSys),	
-			(re.compile(r'SYS_MGR ---> ENG_PRINT.*REQ (\w+)} {(\w+) (\w+) (\w+)} (\d+)'), SysReqPrint),	
+			(re.compile(r'SysMgrUCO_JobEnd:\d+ : .*ppType: (\w+).*ID: (\d+).*Enter Time: (\d+)'), SysMgrUCO_JobEnd),
+			(re.compile(r'SYS_MGR ---> ENG_PRINT   , {(\w+) (\w+)} {(\w+) (\w+) (\w+)} (\d+)'), SysToPrint),
 			(re.compile(r'_ReportTrayInfo_:\d+ : tray (\d+).*paper exist: (\d+).*T\((\d+)\)'), ReportTrayInfo),
 			(re.compile(r'_PostActiveTrayEr: Post EVENT:    ENG_PRINT ---> SYS_MGR     , {ERR E_ACTIVE_TRAY} {(\w+) (\w+) \w+} (\d+)'), PostActiveTrayErr),
+			(re.compile(r'.*ENG_PRINT ---> SYS_MGR     , {(\w+) (\w+)} {(\w+) (\w+) (\w+)} (\d+)'), PcuToSys),
 			(re.compile(r'PostJamWithPageS: .*_JAM} {(\w+) (\w+) (\w+)} (\d+)'), PostPaperJamErr),
 			(re.compile(r'PostNoMatchPaper: .*_NO_MATCH_PAPER} {(\w+) (\w+) (\w+)} (\d+)'), PostNoMatchPaper),
 			(re.compile(r'StateCenter_ErrorMessageSend_Line:\d+ : owner=(\d+), error=(\d+), status=(\d+), param1=(\d+), param2=(\w+), gSCState=(\d+)'), McuErrorLog),

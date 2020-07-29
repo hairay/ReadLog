@@ -144,6 +144,12 @@ def PrintErrToSys(m):
 	diff = GetMsTimeFromStart(time , _curJobTime)
 	print("[%8d][%8d][ %6d ] ENG_PRINT ---> SYS_MGR %s %s %s %s" % (time, diff, _lineNum, errMsg, param2, param3, param4))
 
+def McuErrorLog(m):	
+	owner, error, status, param1, param2, gSCState = m.groups()
+	
+	print("[%8s][%8s][ %6d ] MCU error log owner:%s error:%s status:%s param1:%s param2:%s gSCState:%s" % ('xxx', 'xxx', _lineNum, owner, error, status, param1, param2, gSCState))
+
+
 def SearchLog(f, patterns):
 	global _lineNum
 	for line in f:   
@@ -169,6 +175,7 @@ if __name__ == '__main__':
 			(re.compile(r'_PostActiveTrayEr: Post EVENT:    ENG_PRINT ---> SYS_MGR     , {ERR E_ACTIVE_TRAY} {(\w+) (\w+) \w+} (\d+)'), PostActiveTrayErr),
 			(re.compile(r'PostJamWithPageS: .*_JAM} {(\w+) (\w+) (\w+)} (\d+)'), PostPaperJamErr),
 			(re.compile(r'PostNoMatchPaper: .*_NO_MATCH_PAPER} {(\w+) (\w+) (\w+)} (\d+)'), PostNoMatchPaper),
+			(re.compile(r'StateCenter_ErrorMessageSend_Line:\d+ : owner=(\d+), error=(\d+), status=(\d+), param1=(\d+), param2=(\w+), gSCState=(\d+)'), McuErrorLog),
 			(re.compile(r'Main Program Start'), RestartMachine),
 			(re.compile(r'DSP_IP_Init'), RestartMachine),
 			]

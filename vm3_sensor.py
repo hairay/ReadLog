@@ -52,10 +52,10 @@ def RecordSensorInfo(sensorId, sensorStatus, m3time):
 	sensorTimeX[sensorId].append(_curTime)
 	sensorPosY[sensorId].append(sensorStatus)
 
-def ShowSensor(m):
+def ShowM3PSensor(m):
 	global _curTime	
 	
-	a9time, sensorId, sensorStatus, m3time = m.groups()
+	sensorId, sensorStatus, m3time = m.groups()
 	if _curTime == 0:		
 		print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))
 
@@ -127,7 +127,8 @@ def SearchLog(f, patterns):
 
 if __name__ == '__main__':	
 	patterns = [						
-			#(re.compile(r'UpdatePrinterSensorStatus:\d+\(Time:(\d+)\) : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+)'), ShowSensor),
+			(re.compile(r'PrintParser_SensorTestInfoCallBackProc:\d+ : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+) Enter Time: \d+'), ShowM3PSensor),
+			#(re.compile(r'UpdatePrinterSensorStatus:\d+\(Time:\d+\) : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+)'), ShowM3PSensor),			
 			(re.compile(r'PRINTER_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckVm3Sensor),
 			(re.compile(r'Sensor_PrintStatas:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status, RegisterSN\) = \(\d+, (\w+), \d+\). T\((\d+).*\)'), CheckMiceSensor),
 			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),

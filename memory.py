@@ -26,8 +26,8 @@ def PhyMemToVirMem(m):
 	virAddr2Size[virPtr] = [size, _lineNum]
 	if phyAddr not in phyAddr2Size:
 		print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
-	elif phyAddr2Size[phyAddr][0] != size:
-		print("[ %6d ] PhyMemToVirMem phyAddr:%s size:%s != original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
+	elif int(phyAddr2Size[phyAddr][0]) < int(size):
+		print("[ %6d ] PhyMemToVirMem phyAddr:%s size:%s > original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 
 def InvadateCache(m):	
 	phyAddr, size = m.groups()	

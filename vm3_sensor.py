@@ -3,11 +3,12 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 
-max_sensor_num = 30
+max_sensor_num = 35
 sensorName=['MANUAL_TRAY','MAIN_TRAY','SECOND_TRAY','THIRD_TRAY','FOURTH_TRAY','PAPER_DETECT_1','PAPER_DETECT_2',
 'MAIN_FEED','DESKEW','REGISTRATION','REGISTRATION2','OPC_JAM','FUSER_OUT','EXIT','DUPLEX','FRONT_COVER',       
 'REAR_COVER','DUPLEX_COVER','NEAR_EMPTY','TRAY1_COVER','TRAY1_CAPACITY','LIFTUP','PICKUP_CHECK','SECOND_TRAY_PAPER_OUT',
-'THIRD_TRAY_PAPER_OUT','FOURTH_TRAY_PAPER_OUT','EXIT_CAPACITY','MANUAL_TRAY_PAPER_SIZE', 'MAIN_TRAY_PAPER_SIZE', 'S29']
+'THIRD_TRAY_PAPER_OUT','FOURTH_TRAY_PAPER_OUT','EXIT_CAPACITY','MANUAL_TRAY_PAPER_SIZE', 'MAIN_TRAY_PAPER_SIZE', 'MAIN_FRAME_PAPER_SIZE_LEFT', 'MAIN_FRAME_PAPER_SIZE_RIGHT', 
+'S31', 'S32', 'S33', 'S34']
 
 _lineNum = 0
 _curTime = 0
@@ -130,6 +131,7 @@ if __name__ == '__main__':
 			(re.compile(r'PrintParser_SensorTestInfoCallBackProc:\d+ : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+) Enter Time: \d+'), ShowM3PSensor),
 			#(re.compile(r'UpdatePrinterSensorStatus:\d+\(Time:\d+\) : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+)'), ShowM3PSensor),			
 			(re.compile(r'PRINTER_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckVm3Sensor),
+			(re.compile(r'SENSOR_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckVm3Sensor),
 			(re.compile(r'Sensor_PrintStatas:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status, RegisterSN\) = \(\d+, (\w+), \d+\). T\((\d+).*\)'), CheckMiceSensor),
 			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
 			(re.compile(r'DSP_IP_Init'), RestartM3)

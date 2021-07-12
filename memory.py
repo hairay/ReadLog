@@ -79,7 +79,9 @@ if __name__ == '__main__':
             (re.compile(r'__PhyMemToVirMem:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+) vPtr=(\w+)'), PhyMemToVirMem),
 			(re.compile(r'mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), QuasarPhyMemToVirMem),
 			(re.compile(r'InvadateCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), InvadateCache),
+			(re.compile(r'MemMgrInvadateCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), InvadateCache),
 			(re.compile(r'FlushCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), FlushCache),
+			(re.compile(r'MemMgrFlushCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), FlushCache),
             (re.compile(r'ReleaseMapVirMem:\d+\(Time:\d+\) : .*vPtr = (\w+) size=(\d+)'), ReleaseMapVirMem),
 			(re.compile(r'munmap addr=(\w+) size=(\d+)'), ReleaseMapVirMem),
 			]

@@ -45,9 +45,9 @@ def AssignVal(m):
 	centerY.append(float(m.groups(0)[3]))
 	sideY.append(float(m.groups(0)[5]))
 	targetY.append(float(m.groups(0)[7]))
-	envY.append(float(m.groups(0)[-2]))	
-	if float(m.groups(0)[-2]) > 50:
-		debugFp.write("error env temp %s line:%d \n" % (m.groups(0)[-2], _lineNum))
+	envY.append(float(m.groups(0)[9]))	
+	if float(m.groups(0)[9]) > 50:
+		debugFp.write("error env temp %s line:%d \n" % (m.groups(0)[9], _lineNum))
 	
 
 def ShowHeatingInfo13(m):	

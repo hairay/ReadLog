@@ -29,7 +29,7 @@ def RestartM3(m):
 	#debugFp.write("RestartM3 _startM3pTime:%f _curM3pTime:%f \n" % (_startM3pTime, _curM3pTime))	
 	_startM3pTime = _curM3pTime
 	
-def AssignVal(m):
+def AssignVal(m, envPos):
 	global debugFp
 	global _curM3pTime
 	global _startM3pTime
@@ -45,9 +45,9 @@ def AssignVal(m):
 	centerY.append(float(m.groups(0)[3]))
 	sideY.append(float(m.groups(0)[5]))
 	targetY.append(float(m.groups(0)[7]))
-	envY.append(float(m.groups(0)[9]))	
-	if float(m.groups(0)[9]) > 50:
-		debugFp.write("error env temp %s line:%d \n" % (m.groups(0)[9], _lineNum))
+	envY.append(float(m.groups(0)[envPos]))	
+	if float(m.groups(0)[envPos]) > 50:
+		debugFp.write("error env temp %s line:%d \n" % (m.groups(0)[envPos], _lineNum))
 	
 
 def ShowHeatingInfo13(m):	
@@ -56,7 +56,7 @@ def ShowHeatingInfo13(m):
 		print(_header13)
 		_startTime = float(m.groups(0)[0])/1000.0			
 	print("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (m.groups()))	
-	AssignVal(m)
+	AssignVal(m, -2)
 
 def ShowHeatingInfo14(m):	
 	global _startTime		
@@ -64,7 +64,7 @@ def ShowHeatingInfo14(m):
 		print(_header14)	
 		_startTime = float(m.groups(0)[0])/1000.0			
 	print("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (m.groups()))	
-	AssignVal(m)
+	AssignVal(m, -3)
 
 def ShowHeatingInfoTwinColor(m):
 	global _startTime		

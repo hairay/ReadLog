@@ -8,7 +8,8 @@ _startTime = 0
 _curM3pTime = 0.0
 _startM3pTime = 0.0
 _header13 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,envHw,envSw,set3'
-_header14 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,set3,envHw,envSw,set4'
+_header14 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,envHw,envSw,set3,set4'
+_header15 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,set3,envHw,envSw,set4, set5'
 _headerTwinColor = 'state,centerHw,centerSw,sideHw,sideSw,envSw,type,targetSw,LampOn,LampOn_Side,time'
 _headerTwinColor12 = 'state,centerHw,centerSw,sideHw,sideSw,envSw,type,targetSw,LampOn,LampOn_Side,set,time'
 _headerTwinColor7 = 'state,centerHw,centerSw,sideHw,sideSw,targetSw,time'
@@ -64,6 +65,14 @@ def ShowHeatingInfo14(m):
 		print(_header14)	
 		_startTime = float(m.groups(0)[0])/1000.0			
 	print("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (m.groups()))	
+	AssignVal(m, -3)
+
+def ShowHeatingInfo15(m):	
+	global _startTime		
+	if _startTime == 0:
+		print(_header14)	
+		_startTime = float(m.groups(0)[0])/1000.0			
+	print("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (m.groups()))	
 	AssignVal(m, -3)
 
 def ShowHeatingInfoTwinColor(m):
@@ -156,6 +165,7 @@ if __name__ == '__main__':
 	patterns = [													
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo13),
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo14),
+			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo15),
 			(re.compile(r'O_TwinColor_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+). (\d+) ms'), ShowHeatingInfoTwinColor),
 			(re.compile(r'O_TwinColor_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+). (\d+) ms'), ShowHeatingInfoTwinColor),
 			(re.compile(r'O_TwinColor_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) ms'), ShowHeatingInfoTwinColor),

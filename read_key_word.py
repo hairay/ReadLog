@@ -1,11 +1,10 @@
 import sys
 import re
-import numpy as np
 
 _lineNum = 0
 
-def PrintKeyWord(m):
-	print("[ %6d ] %s" % (_lineNum, m),end='')
+def PrintKeyWord(allLine):
+	print("[ %6d ] %s" % (_lineNum, allLine),end='')
 
 def SearchLog(f, patterns):
 	global _lineNum
@@ -19,7 +18,11 @@ def SearchLog(f, patterns):
 
 if __name__ == '__main__':	
 	patterns = [												
-			(re.compile(r'error code|ASSERT|DATA ABORT|ServiceCall|time out'), PrintKeyWord),
+			(re.compile(r'error code|ALERT:'), PrintKeyWord),
+			(re.compile(r'osAssertCalled|ASSERT'), PrintKeyWord),
+			(re.compile(r'DATA ABORT|HardFault|SIGTERM|SIGINT'), PrintKeyWord),
+			(re.compile(r'ServiceCall|service call|wServiceCallError'), PrintKeyWord),
+			(re.compile(r'time out .*error'), PrintKeyWord),
 			]
 	SearchLog(sys.stdin, patterns)
 

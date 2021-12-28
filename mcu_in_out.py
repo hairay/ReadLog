@@ -53,45 +53,6 @@ def RecordSensorInfo(sensorId, sensorStatus, m3time):
 	sensorTimeX[sensorId].append(_curTime)
 	sensorPosY[sensorId].append(sensorStatus)
 
-def ShowM3PSensor(m):
-	global _curTime	
-	
-	sensorId, sensorStatus, m3time = m.groups()
-	if _curTime == 0:		
-		print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))
-
-	_curTime = float(m3time)/1000.0 + _startM3pTime
-	sensorId = int(sensorId)
-	sensorStatus = int(sensorStatus)
-	RecordSensorInfo(sensorId, sensorStatus, m3time)
-
-def CheckVm3Sensor(m):
-	global _curTime	
-	global _curSensorId
-
-	m3time, sensorId, sensorStatus = m.groups()
-	if _curTime == 0:		
-		print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))
-	_curTime = float(m3time)/1000.0 + _startM3pTime
-
-	if sensorId not in sensorName2id:
-		sensorName[_curSensorId] = sensorId
-		sensorName2id[sensorId] = _curSensorId
-		_curSensorId += 1
-
-	if sensorId in sensorName2id:
-		sensorId = sensorName2id[sensorId]
-	else:
-		#print("%40s %6s %8s %12s %12s" % (sensorId, "XXX", "XXX","XXX","XXX"))
-		return None	
-	if sensorStatus in stateName2id:
-		sensorStatus = stateName2id[sensorStatus]
-	else:
-		#print("%40s %6s %8s %12s %12s" % ("XXX", "XX", sensorStatus,"XXX","XXX"))
-		return None	
-				
-	RecordSensorInfo(sensorId, sensorStatus, m3time)
-
 def CheckMiceSensor(m):
 	global _curTime	
 	global _curSensorId
@@ -127,15 +88,11 @@ def SearchLog(f, patterns):
 				break
 
 if __name__ == '__main__':	
-	patterns = [						
-			(re.compile(r'PrintParser_SensorTestInfoCallBackProc:\d+ : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+) Enter Time: \d+'), ShowM3PSensor),
-			#(re.compile(r'UpdatePrinterSensorStatus:\d+\(Time:\d+\) : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+)'), ShowM3PSensor),			
-			(re.compile(r'PRINTER_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckVm3Sensor),
-			(re.compile(r'SENSOR_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckVm3Sensor),
+	patterns = [									
+			(re.compile(r'IO_CtrlTable_SetValue:\d+ : (\w+) id=\d+ state=(\d+) T\((\d+)\).*'), CheckMiceSensor),
 			(re.compile(r'Sensor_PrintStatas:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status, RegisterSN\) = \(\d+, (\w+), \d+\). T\((\d+).*\)'), CheckMiceSensor),
-			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
-			(re.compile(r'O_EngFw_Init'), RestartM3),
-			(re.compile(r'DSP_IP_Init'), RestartM3)
+			(re.compile(r'Sensor_RegisterWithDebounceTime:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status\) = \(\d+, (\w+)\). T\((\d+).*\)'), CheckMiceSensor),
+			(re.compile(r'O_EngFw_Init'), RestartM3)
 			]
 	
 	SearchLog(sys.stdin, patterns)
@@ -153,6 +110,6 @@ if __name__ == '__main__':
 	plt.title("Sensor Curve", fontsize=8)
 	plt.xlabel("Time(Sec)", fontsize=14)
 	plt.ylabel("sensor pos", fontsize=14)
-	plt.tick_params(axis='both', labelsize=8, color='red')
-	#plt.show()
+	plt.tick_params(axis='both', labelsize=8, color='red')	
 	plt.savefig('curve.png', bbox_inches='tight')
+	plt.show()

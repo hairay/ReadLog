@@ -29,6 +29,10 @@ def PhyMemToVirMem(m):
 	elif int(phyAddr2Size[phyAddr][0]) < int(size):
 		print("[ %6d ] PhyMemToVirMem phyAddr:%s size:%s > original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 
+def FileToVirMem(m):	
+	virPtr = m.groups()
+	virAddr2Size[virPtr] = [0, _lineNum]
+	
 def QuasarPhyMemToVirMem(m):	
 	virPtr, size, phyAddr = m.groups()
 	virAddr2Size[virPtr] = [size, _lineNum]
@@ -55,7 +59,7 @@ def ReleaseMapVirMem(m):
 	virPtr, size = m.groups()
 	
 	if virPtr in virAddr2Size:
-		if virAddr2Size[virPtr][0] != size:
+		if virAddr2Size[virPtr][0] != size & virAddr2Size[virPtr][0] != 0:
 			print("[ %6d ] ReleaseMapVirMem virAddr:%s size:%s != original size:%s" % (_lineNum, virPtr, size, virAddr2Size[virPtr]))
 		del virAddr2Size[virPtr]    
 	else:		
@@ -77,6 +81,7 @@ if __name__ == '__main__':
 			(re.compile(r'MemMgrMalloc Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrMalloc),
             (re.compile(r'MemMgrFree Free Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrFree),	
             (re.compile(r'__PhyMemToVirMem:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+) vPtr=(\w+)'), PhyMemToVirMem),
+			(re.compile(r'NotifyFileToHost:\d+\(Time:\d+\) : .*pVaddr=(\w+)'), FileToVirMem),
 			(re.compile(r'mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), QuasarPhyMemToVirMem),
 			(re.compile(r'InvadateCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), InvadateCache),
 			(re.compile(r'MemMgrInvadateCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), InvadateCache),

@@ -144,7 +144,8 @@ if __name__ == '__main__':
 	lineNum = max_sensor_num
 	for i in range(max_sensor_num):
 		if len(sensorTimeX[i]) > 1:
-			sensorPosY[i] = list(np.asarray(sensorPosY[i])*8+lineNum*10)			
+			sensorPosY[i] = list(np.asarray(sensorPosY[i])*8+lineNum*10)
+			sensorName[i] += ('[' +str(lineNum*10)+']')			
 			plt.plot(sensorTimeX[i], sensorPosY[i], label=sensorName[i])
 			lineNum -= 1
 	

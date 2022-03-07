@@ -92,7 +92,7 @@ if __name__ == '__main__':
 			(re.compile(r'IO_CtrlTable_SetValue:\d+ : (\w+) id=\d+ state=(\d+) T\((\d+)\).*'), CheckMiceSensor),
 			(re.compile(r'Sensor_PrintStatas:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status, RegisterSN\) = \(\d+, (\w+), \d+\). T\((\d+).*\)'), CheckMiceSensor),
 			(re.compile(r'Sensor_RegisterWithDebounceTime:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status\) = \(\d+, (\w+)\). T\((\d+).*\)'), CheckMiceSensor),
-			(re.compile(r'O_EngFw_Init'), RestartM3)
+			(re.compile(r'M31:PRT Clock:'), RestartM3)
 			]
 	
 	SearchLog(sys.stdin, patterns)

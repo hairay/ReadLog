@@ -174,6 +174,7 @@ if __name__ == '__main__':
 			(re.compile(r'O_MICE_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], \((\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\) gFuserTargetTemp=(\d+),gA4FlickerMode=\d+,Nip=(\d+), (\d+) ms'), ShowHeatingInfoMice),
 			(re.compile(r'\(TempA3, TempA4, gCtrlTempA3, gCtrlTempA4\) = /(\d+)/(\d+)/(\d+)/(\d+)/ T\((\d+), (\d+)\)'), ShowHeatingInfoPanther),
 			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
+			(re.compile(r'M31:PRT Clock:'), RestartM3),
 			]
 	SearchLog(sys.stdin, patterns)
 	my_dpi = 96

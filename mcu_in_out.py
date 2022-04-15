@@ -57,9 +57,7 @@ def CheckMiceSensor(m):
 	global _curTime	
 	global _curSensorId
 
-	sensorId, sensorStatus, m3time = m.groups()
-	if _curTime == 0:		
-		print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))
+	sensorId, sensorStatus, m3time = m.groups()				
 	_curTime = float(m3time)/1000.0 + _startM3pTime
 
 	if sensorId not in sensorName2id:
@@ -94,7 +92,7 @@ if __name__ == '__main__':
 			(re.compile(r'Sensor_RegisterWithDebounceTime:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status\) = \(\d+, (\w+)\). T\((\d+).*\)'), CheckMiceSensor),
 			(re.compile(r'M31:PRT Clock:'), RestartM3)
 			]
-	
+	print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))
 	SearchLog(sys.stdin, patterns)
 	my_dpi = 96
 	plt.figure(figsize=(2048/my_dpi, 1024/my_dpi), dpi=my_dpi)

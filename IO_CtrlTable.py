@@ -15,6 +15,7 @@ _curTime = 0
 _curSensorId =0
 oldM3Time = 0
 oldM3UsTime = 0
+maxDiff = 0
 sensorName2id = {}
 id = 0
 
@@ -33,6 +34,7 @@ def CheckMiceOutput(m):
 	global _curSensorId
 	global oldM3Time	
 	global oldM3UsTime
+	global maxDiff
 
 	sensorId, sensorStatus, m3time, m3UsTime = m.groups()
 	
@@ -51,19 +53,18 @@ def CheckMiceOutput(m):
 	m3UsTime = int(m3UsTime)			
 
 	if _curTime == 0:		
-		print("%s,%s,%s,%s,%s,%s,%s,%s,%s"%("Name", "ID", "state","time(ms)","time(us)","line","osDiff","hwDiff", "Note"))		
+		print("%s,%s,%s,%s,%s,%s,%s,%s,%s"%("Name", "ID", "state","time(ms)","time(us)","line","osDiff","hwDiff", "Diff"))		
 
-	if m3time <= 1:
+	if _curTime == 0 or m3time == 0 :
 		print("%s,%d,%d,%d,%d,%s"%(sensorName[sensorId], sensorId, sensorStatus,m3time,m3UsTime,_lineNum))		
 	else:
 		msDiff = GetMsTimeFromStart(m3time, oldM3Time)
 		usDiff = GetMsTimeFromStart(m3UsTime, oldM3UsTime)/1000
 		diff = abs(msDiff-usDiff)
-		if diff > 1:
-			note = "error"
-		else:
-			note = ""
-		print("%s,%d,%d,%d,%d,%s,%d,%d,%s"%(sensorName[sensorId], sensorId, sensorStatus,m3time,m3UsTime,_lineNum,msDiff,usDiff,note))
+		if diff > maxDiff:
+			maxDiff = diff
+		
+		print("%s,%d,%d,%d,%d,%s,%d,%8.2f,%8.2f"%(sensorName[sensorId], sensorId, sensorStatus,m3time,m3UsTime,_lineNum,msDiff,usDiff,diff))
 
 	oldM3Time = int(m3time)
 	oldM3UsTime = int(m3UsTime)			
@@ -87,4 +88,4 @@ if __name__ == '__main__':
 			]
 	
 	SearchLog(sys.stdin, patterns)
-	
+	print(",,,,,,,,%8.2f"%(maxDiff))	

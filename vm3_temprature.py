@@ -21,6 +21,7 @@ timeX = []
 centerY = []
 sideY = []
 targetY = []
+DutyY = []
 envY = []
 
 def RestartM3(m):
@@ -124,6 +125,7 @@ def ShowHeatingInfoMice(m):
 	timeX.append(now)
 	centerY.append(float(m.groups(0)[2]))
 	sideY.append(float(m.groups(0)[4]))
+	DutyY.append(float(m.groups(0)[11]))
 	targetY.append(float(m.groups(0)[12]))
 	envY.append(float(m.groups(0)[6]))
 
@@ -184,6 +186,9 @@ if __name__ == '__main__':
 	plt.plot(timeX, targetY, label='Target')
 	if len(envY) > 1:
 		plt.plot(timeX, envY, label='Env')
+	if len(DutyY) > 1:
+		plt.plot(timeX, DutyY, label='Duty')	
+		
 	plt.legend()
 	plt.title("Temprature Curve", fontsize=24)
 	plt.xlabel("Time(Sec)", fontsize=14)

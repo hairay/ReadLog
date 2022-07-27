@@ -21,6 +21,7 @@ timeX = []
 centerY = []
 sideY = []
 targetY = []
+NipY = []
 DutyY = []
 envY = []
 
@@ -127,6 +128,7 @@ def ShowHeatingInfoMice(m):
 	sideY.append(float(m.groups(0)[4]))
 	DutyY.append(float(m.groups(0)[11]))
 	targetY.append(float(m.groups(0)[12]))
+	NipY.append(float(m.groups(0)[13])*120)
 	envY.append(float(m.groups(0)[6]))
 
 
@@ -188,6 +190,8 @@ if __name__ == '__main__':
 		plt.plot(timeX, envY, label='Env')
 	if len(DutyY) > 1:
 		plt.plot(timeX, DutyY, label='Duty')	
+	if len(NipY) > 1:
+		plt.plot(timeX, NipY, label='Nip')	
 		
 	plt.legend()
 	plt.title("Temprature Curve", fontsize=24)

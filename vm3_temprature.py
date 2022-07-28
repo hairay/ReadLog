@@ -1,6 +1,7 @@
 import sys
 import re
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import MultipleLocator
 
 debugFp = open("debug.log", "a")
 _lineNum = 0
@@ -194,6 +195,10 @@ if __name__ == '__main__':
 		plt.plot(timeX, NipY, label='Nip')	
 		
 	plt.legend()
+	y_major_locator=MultipleLocator(10)
+	ax=plt.gca()	
+	#Set y-axis major ticks to multiples of 10
+	ax.yaxis.set_major_locator(y_major_locator)
 	plt.title("Temprature Curve", fontsize=24)
 	plt.xlabel("Time(Sec)", fontsize=14)
 	plt.ylabel("Temprature", fontsize=14)

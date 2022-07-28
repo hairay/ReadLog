@@ -128,7 +128,7 @@ def ShowHeatingInfoMice(m):
 	sideY.append(float(m.groups(0)[4]))
 	DutyY.append(float(m.groups(0)[11]))
 	targetY.append(float(m.groups(0)[12]))
-	NipY.append(float(m.groups(0)[13])*120)
+	NipY.append(float(m.groups(0)[13])*115+5.0)
 	envY.append(float(m.groups(0)[6]))
 
 

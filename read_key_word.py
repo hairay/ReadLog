@@ -23,7 +23,7 @@ if __name__ == '__main__':
 			(re.compile(r'DATA ABORT|HardFault|SIGTERM|SIGINT'), PrintKeyWord),
 			(re.compile(r'ServiceCall|service call|wServiceCallError'), PrintKeyWord),
 			(re.compile(r'time out .*error'), PrintKeyWord),
-			(re.compile(r'SysErrInfo_GetErrNum'), PrintKeyWord),
+			#(re.compile(r'SysErrInfo_GetErrNum'), PrintKeyWord),
 			(re.compile(r'Report engine Error state'), PrintKeyWord),
 			(re.compile(r'fail_ap.log'), PrintKeyWord),						
 			]

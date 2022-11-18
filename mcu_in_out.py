@@ -2,6 +2,7 @@ import sys
 import re
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.pyplot import MultipleLocator
 
 max_sensor_num = 35
 sensorName=['MANUAL_TRAY','MAIN_TRAY','SECOND_TRAY','THIRD_TRAY','FOURTH_TRAY','PAPER_DETECT_1','PAPER_DETECT_2',
@@ -105,6 +106,10 @@ if __name__ == '__main__':
 			lineNum -= 1
 	
 	plt.legend(loc='upper left',bbox_to_anchor=(1,1))
+	y_major_locator=MultipleLocator(10)
+	ax=plt.gca()	
+	#Set y-axis major ticks to multiples of 10
+	ax.yaxis.set_major_locator(y_major_locator)
 	plt.tight_layout(pad=3)
 	plt.title("Sensor Curve", fontsize=8)
 	plt.xlabel("Time(Sec)", fontsize=14)

@@ -199,11 +199,11 @@ if __name__ == '__main__':
 	ax=plt.gca()	
 	#Set y-axis major ticks to multiples of 10
 	ax.yaxis.set_major_locator(y_major_locator)
-	plt.title("Temprature Curve", fontsize=24)
+	plt.title("Temperature Curve", fontsize=24)
 	plt.xlabel("Time(Sec)", fontsize=14)
-	plt.ylabel("Temprature", fontsize=14)
+	plt.ylabel("Temperature", fontsize=14)
 	plt.tick_params(axis='both', labelsize=12, color='red')
 	#plt.show()
-	plt.savefig('curve.png', bbox_inches='tight')     # 存檔
+	plt.savefig('curve.png', bbox_inches='tight')
 
 debugFp.close()

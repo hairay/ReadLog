@@ -2,6 +2,7 @@ import sys
 import re
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
+from matplotlib.backend_bases import MouseButton
 
 debugFp = open("debug.log", "a")
 _lineNum = 0
@@ -152,6 +153,17 @@ def ShowHeatingInfoPanther(m):
 	
 	targetY.append(float(m.groups(0)[2]))
 	
+def on_move(event):
+    if event.inaxes:
+        print(f'data coords {event.xdata} {event.ydata},',
+              f'pixel coords {event.x} {event.y}')
+
+
+def on_click(event):
+    if event.button is MouseButton.LEFT:
+        label = "Time(Sec) " + str(event.xdata) + " " + str(event.ydata)        
+        plt.xlabel(label , fontsize=14)
+        plt.show()
 
 def SearchLog(f, patterns):
 	global _lineNum
@@ -203,7 +215,9 @@ if __name__ == '__main__':
 	plt.xlabel("Time(Sec)", fontsize=14)
 	plt.ylabel("Temperature", fontsize=14)
 	plt.tick_params(axis='both', labelsize=12, color='red')
-	#plt.show()
+	#binding_id = plt.connect('motion_notify_event', on_move)
+	#plt.connect('button_press_event', on_click)
+	plt.show()
 	plt.savefig('curve.png', bbox_inches='tight')
 
 debugFp.close()

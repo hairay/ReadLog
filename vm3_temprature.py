@@ -217,7 +217,7 @@ if __name__ == '__main__':
 	plt.tick_params(axis='both', labelsize=12, color='red')
 	#binding_id = plt.connect('motion_notify_event', on_move)
 	#plt.connect('button_press_event', on_click)
-	plt.show()
+	#plt.show()
 	plt.savefig('curve.png', bbox_inches='tight')
 
 debugFp.close()

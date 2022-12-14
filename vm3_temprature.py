@@ -50,6 +50,9 @@ def AssignVal(m, envPos):
 	centerY.append(float(m.groups(0)[3]))
 	sideY.append(float(m.groups(0)[5]))
 	targetY.append(float(m.groups(0)[7]))
+	DutyY.append(float(m.groups(0)[-6]))	
+	NipY.append(float(m.groups(0)[-1])*2.25+2.5)
+	#debugFp.write("Duty:%f  NipY:%f line:%d \n" % (float(m.groups(0)[-4]), float(m.groups(0)[-1]), _lineNum)) 
 	envY.append(float(m.groups(0)[envPos]))	
 	if float(m.groups(0)[envPos]) > 50:
 		debugFp.write("error env temp %s line:%d \n" % (m.groups(0)[envPos], _lineNum))
@@ -130,7 +133,7 @@ def ShowHeatingInfoMice(m):
 	sideY.append(float(m.groups(0)[4]))
 	DutyY.append(float(m.groups(0)[11]))
 	targetY.append(float(m.groups(0)[12]))
-	NipY.append(float(m.groups(0)[13])*115+5.0)
+	NipY.append(float(m.groups(0)[13])*245+5.0)
 	envY.append(float(m.groups(0)[6]))
 
 

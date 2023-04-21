@@ -155,5 +155,5 @@ if __name__ == '__main__':
 	plt.xlabel("Time(Sec)", fontsize=14)
 	plt.ylabel("sensor pos", fontsize=14)
 	plt.tick_params(axis='both', labelsize=8, color='red')
-	#plt.show()
 	plt.savefig('curve.png', bbox_inches='tight')
+	plt.show()

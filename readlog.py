@@ -32,8 +32,9 @@ def SysMgrUCO_JobStart(m):
 	diff = 0
 	if job:
 		_curJobId = job
-		diff = GetMsTimeFromStart(time , _jobIdTime[job])
-		#_jobIdTime[job] = time	
+		if _jobIdTime[job] == 0:
+			_jobIdTime[job] = time
+		diff = GetMsTimeFromStart(time , _jobIdTime[job])		
 	print("[%8d][%8d][ %6d ] JobStart for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))	
 	
 def JobMgr_JobStart(m):
@@ -163,7 +164,7 @@ def SearchLog(f, patterns):
 if __name__ == '__main__':	
 	patterns = [									
 			(re.compile(r'SysMgrUCO_JobStart.*ppType: (\w+),.*ID: (\d+).*Enter Time: (\d+)'), SysMgrUCO_JobStart),
-			(re.compile(r'JobMgr_JobStart: add new job: .*ID = (\d+), appType = (\w+)'), JobMgr_JobStart),
+			(re.compile(r'JobMgr_JobStart: add new .*ID = (\d+), appType = (\w+)'), JobMgr_JobStart),
             (re.compile(r'_PrintPaperIn:\d+ : Report ENG_FD jobNum: (\d+), PID: (\d+).*T\((\d+)\)'), PrintPaperIn),
 			(re.compile(r'_PrintPage:\d+ :PID: (\d+).*Code: (\d+), T\((\d+)\)'), PrintPage),
 			(re.compile(r'_RealProcPageResult:\d+ : .*ID: (\d+),result: (\w+) reason=([-+]?\d+).*T\((\d+)\)'), RealProcPageResult),

@@ -90,6 +90,7 @@ def RealProcPageResult(m):
 	id = int(id)	
 	diff = GetMsTimeFromStart(time , _pageIdJobTime[id])
 	diff2 = GetMsTimeFromStart(time , _pageIdTime[id]) / 1000.0
+	_pageIdTime[id] = 0
 	print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s] page time: %f sec" % (time, diff, _lineNum, id, result, reason, diff2))	
 
 def ReportTrayInfo(m):	
@@ -187,5 +188,9 @@ if __name__ == '__main__':
 			(re.compile(r'DSP_IP_Init'), RestartMachine),
 			]
 	SearchLog(sys.stdin, patterns)
+
+	for i in range(255):
+		if _pageIdTime[i] != 0 :
+			print("page %d 開始時間 %d ms，但找不到結束時間" % (i, _pageIdTime[i]))
 
     

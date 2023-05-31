@@ -3,6 +3,7 @@ import re
 import numpy as np
 
 _lineNum = 0
+_pageIdJobTime = np.zeros((256,), dtype=int)
 _pageIdTime = np.zeros((256,), dtype=int)
 _jobIdTime = np.zeros((256,), dtype=int)
 _curJobTime = 0
@@ -20,7 +21,7 @@ def RestartMachine(m):
 
 	_curJobTime = 0
 	_curJobId = 0	
-	print("[%8d][%8d][ %6d ] Machine Start" % (0, 0, _lineNum))
+	print("[開機時間][job 時間][行號%4d] Machine Start" % (_lineNum))
 
 def SysMgrUCO_JobStart(m):	
 	global _curJobTime	
@@ -67,14 +68,18 @@ def PrintPaperIn(m):
 	job = int(job)
 	id = int(id)
 	diff = GetMsTimeFromStart(time , _jobIdTime[job])
-	_pageIdTime[id] = _jobIdTime[job]
+	_pageIdJobTime[id] = _jobIdTime[job]
 	print("[%8d][%8d][ %6d ] PaperIn for [job:%3d][id:%3d]" % (time, diff, _lineNum, job, id))	
 
 def PrintPage(m):		
 	id, page, time = m.groups()
 	time = int(time)	
 	id = int(id)
-	diff = GetMsTimeFromStart(time , _pageIdTime[id])	
+	if _pageIdTime[id] == time :
+		_pageIdTime[id+1] = time
+	else:	
+		_pageIdTime[id] = time
+	diff = GetMsTimeFromStart(time , _pageIdJobTime[id])
 	print("[%8d][%8d][ %6d ] PrintPage for [sizeCode:%s id:%3d]" % (time, diff, _lineNum, page, id))	
 
 def RealProcPageResult(m):
@@ -83,8 +88,9 @@ def RealProcPageResult(m):
 	id, result, reason, time = m.groups()
 	time = int(time)
 	id = int(id)	
-	diff = GetMsTimeFromStart(time , _pageIdTime[id])
-	print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s]" % (time, diff, _lineNum, id, result, reason))	
+	diff = GetMsTimeFromStart(time , _pageIdJobTime[id])
+	diff2 = GetMsTimeFromStart(time , _pageIdTime[id]) / 1000.0
+	print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s] page time: %f sec" % (time, diff, _lineNum, id, result, reason, diff2))	
 
 def ReportTrayInfo(m):	
 	trayId, exist, time = m.groups()

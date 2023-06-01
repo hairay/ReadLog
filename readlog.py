@@ -89,9 +89,12 @@ def RealProcPageResult(m):
 	time = int(time)
 	id = int(id)	
 	diff = GetMsTimeFromStart(time , _pageIdJobTime[id])
-	diff2 = GetMsTimeFromStart(time , _pageIdTime[id]) / 1000.0
+	if _pageIdTime[id] != 0 :
+		diff2 = GetMsTimeFromStart(time , _pageIdTime[id]) / 1000.0
+		print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s] page time: %f sec S:%d" % (time, diff, _lineNum, id, result, reason, diff2, _pageIdTime[id]))
+	else:		
+		print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s] page time:無開始時間" % (time, diff, _lineNum, id, result, reason))
 	_pageIdTime[id] = 0
-	print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s] page time: %f sec" % (time, diff, _lineNum, id, result, reason, diff2))	
 
 def ReportTrayInfo(m):	
 	trayId, exist, time = m.groups()

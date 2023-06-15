@@ -75,7 +75,7 @@ def PrintPage(m):
 	id, page, time = m.groups()
 	time = int(time)	
 	id = int(id)
-	if _pageIdTime[id] == time :
+	if _pageIdTime[id] != 0 :
 		_pageIdTime[id+1] = time
 	else:	
 		_pageIdTime[id] = time

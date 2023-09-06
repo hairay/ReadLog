@@ -59,7 +59,7 @@ def ReleaseMapVirMem(m):
 	virPtr, size = m.groups()
 	
 	if virPtr in virAddr2Size:
-		if virAddr2Size[virPtr][0] != size & virAddr2Size[virPtr][0] != 0:
+		if virAddr2Size[virPtr][0] != size and virAddr2Size[virPtr][0] != 0:
 			print("[ %6d ] ReleaseMapVirMem virAddr:%s size:%s != original size:%s" % (_lineNum, virPtr, size, virAddr2Size[virPtr]))
 		del virAddr2Size[virPtr]    
 	else:		

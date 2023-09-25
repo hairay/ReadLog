@@ -136,8 +136,13 @@ if __name__ == '__main__':
 			(re.compile(r'munmap addr=(\w+) size=(\d+)'), ReleaseMapVirMem),
 			]
 	
+	pipePhyAddr2Size["0x88000000"] = ["6291456", 0]
+	pipePhyAddr2Size["0x88600000"] = ["6291456", 0]
+
 	SearchLog(sys.stdin, patterns)
-	
+	del pipePhyAddr2Size["0x88000000"]
+	del pipePhyAddr2Size["0x88600000"]
+
 	for key, value in phyAddr2Size.items():
 		print("need MemMgrFree phyAddr:%s size:%s" % (key, value))
 

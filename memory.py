@@ -6,7 +6,6 @@ _curTime = 0
 phyAddr2Size = {}
 virAddr2Size = {}
 pipePhyAddr2Size = {}
-pipeVirAddr2Size = {}
 
 def SearchPipePhyMem(addr, size):
 	for key, value in pipePhyAddr2Size.items():
@@ -16,19 +15,18 @@ def SearchPipePhyMem(addr, size):
 			return 1
 	return 0
 
+def IPMallocPhy(m):
+	virPtr, size,  phyAddr= m.groups()
+	pipePhyAddr2Size[phyAddr] = [size, _lineNum]
+	virAddr2Size[virPtr] = [size, _lineNum]
+
 def MemMgrMalloc(m):
 	phyAddr, size = m.groups()
 	phyAddr2Size[phyAddr] = [size, _lineNum]
 
-def IPMallocPhy(m):
-	virPtr, size,  phyAddr= m.groups()
-	phyAddr2Size[phyAddr] = [size, _lineNum]
-	virAddr2Size[virPtr] = [size, _lineNum]
-
-def IMGMEMgetPoolBase(m):
-	virPtr, size,  phyAddr= m.groups()
+def PipeMemMgrMalloc(m):
+	phyAddr, size = m.groups()
 	pipePhyAddr2Size[phyAddr] = [size, _lineNum]
-	pipeVirAddr2Size[virPtr] = [size, _lineNum]
 
 def MemMgrFree(m):	
 	phyAddr, size = m.groups()
@@ -81,11 +79,14 @@ def InvadateCache(m):
 		return
 	if phyAddr not in phyAddr2Size:
 		print("[ %6d ] InvadateCache can't find MemMgrMalloc phyAddr:%s size:%s" % (_lineNum, phyAddr, size))
-	elif phyAddr2Size[phyAddr][0] != size:
+	elif int(phyAddr2Size[phyAddr][0]) < int(size):
 		print("[ %6d ] InvadateCache phyAddr:%s size:%s != original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 
 def FlushCache(m):	
-	phyAddr, size = m.groups()	
+	phyAddr, size = m.groups()
+
+	if SearchPipePhyMem(int(phyAddr,16), int(size)) == 1:
+		return	
 	if phyAddr not in phyAddr2Size:
 		print("[ %6d ] FlushCache can't find MemMgrMalloc phyAddr:%s size:%s" % (_lineNum, phyAddr, size))
 	elif phyAddr2Size[phyAddr][0] != size:
@@ -93,13 +94,7 @@ def FlushCache(m):
 
 def ReleaseMapVirMem(m):	
 	virPtr, size = m.groups()
-	
-	if virPtr in pipeVirAddr2Size:
-		if pipeVirAddr2Size[virPtr][0] != size and pipeVirAddr2Size[virPtr][0] != 0:
-			print("[ %6d ] ReleaseMapVirMem virAddr:%s size:%s != original size:%s" % (_lineNum, virPtr, size, pipePhyAddr2Size[virPtr]))
-		del pipeVirAddr2Size[virPtr]
-		return
-
+		
 	if virPtr in virAddr2Size:
 		if virAddr2Size[virPtr][0] != size and virAddr2Size[virPtr][0] != 0:
 			print("[ %6d ] ReleaseMapVirMem virAddr:%s size:%s != original size:%s" % (_lineNum, virPtr, size, virAddr2Size[virPtr]))
@@ -121,8 +116,9 @@ def SearchLog(f, patterns):
 if __name__ == '__main__':	
 	patterns = [						
 			(re.compile(r'MemMgrMalloc Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrMalloc),
-			(re.compile(r'IPMallocPhys mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), IPMallocPhy),
-			(re.compile(r'IMGMEMgetPoolBase mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), IMGMEMgetPoolBase),
+			(re.compile(r'IPMallocPhys.* mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), IPMallocPhy),
+			(re.compile(r'IImemAllocateSPMEM.* mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), IPMallocPhy),
+			(re.compile(r'IImemAddPool Ptr=(\w+) size=(\d+)'), PipeMemMgrMalloc),
             (re.compile(r'MemMgrFree Free Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrFree),
 			(re.compile(r'IImemFreePool Free Ptr=(\w+) size=(\d+)'), MemMgrFree),
             (re.compile(r'__PhyMemToVirMem:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+) vPtr=(\w+)'), PhyMemToVirMem),
@@ -151,6 +147,3 @@ if __name__ == '__main__':
 
 	for key, value in pipePhyAddr2Size.items():
 		print("need IImemFreePool phyAddr:%s size:%s" % (key, value))
-
-	for key, value in pipeVirAddr2Size.items():
-		print("need ReleasePoolUserAddress virAddr:%s size:%s" % (key, value))   	

@@ -8,6 +8,13 @@ virAddr2Size = {}
 pipePhyAddr2Size = {}
 pipeVirAddr2Size = {}
 
+def SearchPipePhyMem(addr, size):
+	for key, value in pipePhyAddr2Size.items():
+		start = int(key, 16)
+		end = start + int(value[0])
+		if addr >= start and (addr+size) <= end:
+			return 1
+	return 0
 
 def MemMgrMalloc(m):
 	phyAddr, size = m.groups()
@@ -42,6 +49,9 @@ def MemMgrFree(m):
 def PhyMemToVirMem(m):	
 	phyAddr, size, virPtr = m.groups()
 	virAddr2Size[virPtr] = [size, _lineNum]
+
+	if SearchPipePhyMem(int(phyAddr,16), int(size)) == 1:
+		return
 	if phyAddr not in phyAddr2Size:
 		if int(phyAddr,16) >= 0x80000000:
 			print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
@@ -55,6 +65,9 @@ def FileToVirMem(m):
 def QuasarPhyMemToVirMem(m):	
 	virPtr, size, phyAddr = m.groups()
 	virAddr2Size[virPtr] = [size, _lineNum]
+
+	if SearchPipePhyMem(int(phyAddr,16), int(size)) == 1:
+		return
 	if phyAddr not in phyAddr2Size:
 		if int(phyAddr, 16) >= 0x80000000:
 			print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
@@ -63,6 +76,9 @@ def QuasarPhyMemToVirMem(m):
 
 def InvadateCache(m):	
 	phyAddr, size = m.groups()	
+
+	if SearchPipePhyMem(int(phyAddr,16), int(size)) == 1:
+		return
 	if phyAddr not in phyAddr2Size:
 		print("[ %6d ] InvadateCache can't find MemMgrMalloc phyAddr:%s size:%s" % (_lineNum, phyAddr, size))
 	elif phyAddr2Size[phyAddr][0] != size:
@@ -126,4 +142,10 @@ if __name__ == '__main__':
 		print("need MemMgrFree phyAddr:%s size:%s" % (key, value))
 
 	for key, value in virAddr2Size.items():
-		print("need ReleaseMapVirMem virAddr:%s size:%s" % (key, value))    
+		print("need ReleaseMapVirMem virAddr:%s size:%s" % (key, value))
+
+	for key, value in pipePhyAddr2Size.items():
+		print("need IImemFreePool phyAddr:%s size:%s" % (key, value))
+
+	for key, value in pipeVirAddr2Size.items():
+		print("need ReleasePoolUserAddress virAddr:%s size:%s" % (key, value))   	

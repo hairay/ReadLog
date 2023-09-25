@@ -5,15 +5,33 @@ _lineNum = 0
 _curTime = 0
 phyAddr2Size = {}
 virAddr2Size = {}
+pipePhyAddr2Size = {}
+pipeVirAddr2Size = {}
 
-def MemMgrMalloc(m):	
+
+def MemMgrMalloc(m):
 	phyAddr, size = m.groups()
 	phyAddr2Size[phyAddr] = [size, _lineNum]
-	
+
+def IPMallocPhy(m):
+	virPtr, size,  phyAddr= m.groups()
+	phyAddr2Size[phyAddr] = [size, _lineNum]
+	virAddr2Size[virPtr] = [size, _lineNum]
+
+def IMGMEMgetPoolBase(m):
+	virPtr, size,  phyAddr= m.groups()
+	pipePhyAddr2Size[phyAddr] = [size, _lineNum]
+	pipeVirAddr2Size[virPtr] = [size, _lineNum]
 
 def MemMgrFree(m):	
 	phyAddr, size = m.groups()
 	
+	if phyAddr in pipePhyAddr2Size:
+		if pipePhyAddr2Size[phyAddr][0] != size:
+			print("[ %6d ] MemMgrFree phyAddr:%s size:%s != original size:%s" % (_lineNum, phyAddr, size, pipePhyAddr2Size[phyAddr]))
+		del pipePhyAddr2Size[phyAddr]
+		return
+
 	if phyAddr in phyAddr2Size:
 		if phyAddr2Size[phyAddr][0] != size:
 			print("[ %6d ] MemMgrFree phyAddr:%s size:%s != original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
@@ -25,7 +43,8 @@ def PhyMemToVirMem(m):
 	phyAddr, size, virPtr = m.groups()
 	virAddr2Size[virPtr] = [size, _lineNum]
 	if phyAddr not in phyAddr2Size:
-		print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
+		if int(phyAddr,16) >= 0x80000000:
+			print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
 	elif int(phyAddr2Size[phyAddr][0]) < int(size):
 		print("[ %6d ] PhyMemToVirMem phyAddr:%s size:%s > original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 
@@ -37,7 +56,8 @@ def QuasarPhyMemToVirMem(m):
 	virPtr, size, phyAddr = m.groups()
 	virAddr2Size[virPtr] = [size, _lineNum]
 	if phyAddr not in phyAddr2Size:
-		print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
+		if int(phyAddr, 16) >= 0x80000000:
+			print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
 	elif int(phyAddr2Size[phyAddr][0]) < int(size):
 		print("[ %6d ] PhyMemToVirMem phyAddr:%s size:%s > original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 
@@ -58,6 +78,12 @@ def FlushCache(m):
 def ReleaseMapVirMem(m):	
 	virPtr, size = m.groups()
 	
+	if virPtr in pipeVirAddr2Size:
+		if pipeVirAddr2Size[virPtr][0] != size and pipeVirAddr2Size[virPtr][0] != 0:
+			print("[ %6d ] ReleaseMapVirMem virAddr:%s size:%s != original size:%s" % (_lineNum, virPtr, size, pipePhyAddr2Size[virPtr]))
+		del pipeVirAddr2Size[virPtr]
+		return
+
 	if virPtr in virAddr2Size:
 		if virAddr2Size[virPtr][0] != size and virAddr2Size[virPtr][0] != 0:
 			print("[ %6d ] ReleaseMapVirMem virAddr:%s size:%s != original size:%s" % (_lineNum, virPtr, size, virAddr2Size[virPtr]))
@@ -79,7 +105,10 @@ def SearchLog(f, patterns):
 if __name__ == '__main__':	
 	patterns = [						
 			(re.compile(r'MemMgrMalloc Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrMalloc),
-            (re.compile(r'MemMgrFree Free Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrFree),	
+			(re.compile(r'IPMallocPhys mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), IPMallocPhy),
+			(re.compile(r'IMGMEMgetPoolBase mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), IMGMEMgetPoolBase),
+            (re.compile(r'MemMgrFree Free Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrFree),
+			(re.compile(r'IImemFreePool Free Ptr=(\w+) size=(\d+)'), MemMgrFree),
             (re.compile(r'__PhyMemToVirMem:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+) vPtr=(\w+)'), PhyMemToVirMem),
 			(re.compile(r'NotifyFileToHost:\d+\(Time:\d+\) : .*pVaddr=(\w+)'), FileToVirMem),
 			(re.compile(r'mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), QuasarPhyMemToVirMem),

@@ -89,7 +89,7 @@ def FlushCache(m):
 		return	
 	if phyAddr not in phyAddr2Size:
 		print("[ %6d ] FlushCache can't find MemMgrMalloc phyAddr:%s size:%s" % (_lineNum, phyAddr, size))
-	elif phyAddr2Size[phyAddr][0] != size:
+	elif int(phyAddr2Size[phyAddr][0]) < int(size):
 		print("[ %6d ] FlushCache phyAddr:%s size:%s != original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 
 def ReleaseMapVirMem(m):	

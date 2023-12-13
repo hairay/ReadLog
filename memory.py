@@ -57,8 +57,8 @@ def PhyMemToVirMem(m):
 		print("[ %6d ] PhyMemToVirMem phyAddr:%s size:%s > original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 
 def FileToVirMem(m):	
-	virPtr = m.groups()
-	virAddr2Size[virPtr] = [0, _lineNum]
+	virPtr, size = m.groups()
+	virAddr2Size[virPtr] = [size, _lineNum]
 	
 def QuasarPhyMemToVirMem(m):	
 	virPtr, size, phyAddr = m.groups()
@@ -122,7 +122,7 @@ if __name__ == '__main__':
             (re.compile(r'MemMgrFree Free Ptr=(\w+) size=(\d+) gFreeMemSize=\d+'), MemMgrFree),
 			(re.compile(r'IImemFreePool Free Ptr=(\w+) size=(\d+)'), MemMgrFree),
             (re.compile(r'__PhyMemToVirMem:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+) vPtr=(\w+)'), PhyMemToVirMem),
-			(re.compile(r'NotifyFileToHost:\d+\(Time:\d+\) : .*pVaddr=(\w+)'), FileToVirMem),
+            (re.compile(r'NotifyFileToHost:\d+ : mmap addr=(\w+) size=(\d+)'), FileToVirMem),
 			(re.compile(r'mmap addr=(\w+) size=(\d+) phyAddr=(\w+)'), QuasarPhyMemToVirMem),
 			(re.compile(r'InvadateCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), InvadateCache),
 			(re.compile(r'MemMgrInvadateCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), InvadateCache),

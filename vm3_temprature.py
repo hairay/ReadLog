@@ -185,7 +185,7 @@ if __name__ == '__main__':
 	patterns = [													
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo13),
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo14),
-			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo15),
+			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+).'), ShowHeatingInfo15),
 			(re.compile(r'O_TwinColor_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+). (\d+) ms'), ShowHeatingInfoTwinColor),
 			(re.compile(r'O_TwinColor_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+). (\d+) ms'), ShowHeatingInfoTwinColor),
 			(re.compile(r'O_TwinColor_Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) ms'), ShowHeatingInfoTwinColor),

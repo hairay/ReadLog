@@ -9,6 +9,8 @@ _lineNum = 0
 _startTime = 0
 _curM3pTime = 0.0
 _startM3pTime = 0.0
+_tmpDiff = 0.0
+_tmpDiffLine = 0
 _header13 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,envHw,envSw,set3'
 _header14 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,envHw,envSw,set3,set4'
 _header15 = 'time,state,centerHw,centerSw,sideHw,sideSw,targetHw,targetSw,set1,set2,set3,envHw,envSw,set4, set5'
@@ -38,7 +40,7 @@ def AssignVal(m, envPos):
 	global debugFp
 	global _curM3pTime
 	global _startM3pTime
-
+	global _tmpDiff, _tmpDiffLine
 	now = float(m.groups(0)[0])/1000.0 + _startM3pTime
 
 	if len(timeX) > 0 and timeX[-1] > now:					
@@ -53,7 +55,12 @@ def AssignVal(m, envPos):
 	DutyY.append(float(m.groups(0)[-6]))	
 	NipY.append(float(m.groups(0)[-1])*2.25+2.5)
 	#debugFp.write("Duty:%f  NipY:%f line:%d \n" % (float(m.groups(0)[-4]), float(m.groups(0)[-1]), _lineNum)) 
-	envY.append(float(m.groups(0)[envPos]))	
+	envY.append(float(m.groups(0)[envPos]))
+	
+	if(abs(float(m.groups(0)[3])- float(m.groups(0)[5])) > _tmpDiff):
+		_tmpDiff = abs(float(m.groups(0)[3])- float(m.groups(0)[5]))
+		_tmpDiffLine = _lineNum
+	
 	if float(m.groups(0)[envPos]) > 50:
 		debugFp.write("error env temp %s line:%d \n" % (m.groups(0)[envPos], _lineNum))
 	
@@ -222,6 +229,6 @@ if __name__ == '__main__':
 	#plt.connect('button_press_event', on_click)
 	plt.savefig('curve.png', bbox_inches='tight')
 	plt.show()
-
+	debugFp.write("max temprature diff:%f line=%d\n" % (_tmpDiff, _tmpDiffLine))
 
 debugFp.close()

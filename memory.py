@@ -6,6 +6,21 @@ _curTime = 0
 phyAddr2Size = {}
 virAddr2Size = {}
 pipePhyAddr2Size = {}
+imageAddr = {}
+
+def ImageOpen(m):
+	iAddr= m.groups()		
+	if iAddr in imageAddr:
+		print("[ %6d ] ImageOpen use same Addr:%s %s" % (_lineNum, iAddr))
+	else:	
+		imageAddr[iAddr] = [_lineNum]
+	
+def ImageClose(m):
+	iAddr= m.groups()	
+	if iAddr in imageAddr:
+		del imageAddr[iAddr]
+	else:	
+		print("[ %6d ] ImageClose can't fine Addr:%s" % (_lineNum, iAddr))
 
 def SearchPipePhyMem(addr, size):
 	for key, value in pipePhyAddr2Size.items():
@@ -130,6 +145,8 @@ if __name__ == '__main__':
 			(re.compile(r'MemMgrFlushCache:\d+\(Time:\d+\) : .*phyPtr = (\w+) size=(\d+)'), FlushCache),
             (re.compile(r'ReleaseMapVirMem:\d+\(Time:\d+\) : .*vPtr = (\w+) size=(\d+)'), ReleaseMapVirMem),
 			(re.compile(r'munmap addr=(\w+) size=(\d+)'), ReleaseMapVirMem),
+			(re.compile(r'IMAGEopenD.*: (\w+)'), ImageOpen),
+			(re.compile(r'IMAGEcloseD.*: (\w+)'), ImageClose),
 			]
 	
 	pipePhyAddr2Size["0x88000000"] = ["6291456", 0]

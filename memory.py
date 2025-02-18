@@ -67,7 +67,7 @@ def PhyMemToVirMem(m):
 		return
 	if phyAddr not in phyAddr2Size:
 		if int(phyAddr,16) >= 0x80000000:
-			print("[ %6d ] PhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
+			print("[ %6d ] QuasarPhyMemToVirMem can't find MemMgrMalloc phyAddr:%s size:%s virPtr:%s" % (_lineNum, phyAddr, size, virPtr))
 	elif int(phyAddr2Size[phyAddr][0]) < int(size):
 		print("[ %6d ] PhyMemToVirMem phyAddr:%s size:%s > original size:%s" % (_lineNum, phyAddr, size, phyAddr2Size[phyAddr]))
 
@@ -118,6 +118,25 @@ def ReleaseMapVirMem(m):
 		print("[ %6d ] ReleaseMapVirMem can't find virPtr:%s size:%s" % (_lineNum, virPtr, size))
 
 def SearchLog(f, patterns):
+	"""
+	Searches through each line of the given file-like object for patterns and processes matches.
+
+	Args:
+		f (file-like object): The file-like object to read lines from.
+		patterns (list of tuples): A list of tuples where each tuple contains a compiled regex pattern and a corresponding processing function.
+
+	Returns:
+		None
+
+	Side Effects:
+		Increments the global variable _lineNum for each line read.
+		Calls the processing function for each matching pattern.
+
+	Example:
+		patterns = [(re.compile(r'some_pattern'), some_processing_function)]
+		with open('logfile.txt', 'r') as f:
+			SearchLog(f, patterns)
+	"""
 	global _lineNum
 	for line in f:   
 		_lineNum +=1

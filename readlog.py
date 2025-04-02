@@ -79,6 +79,11 @@ def PrintPaperIn(m):
 	_pageIdJobTime[id] = _jobIdTime[job]
 	print("[%8d][%8d][ %6d ] PaperIn for [job:%3d][id:%3d]" % (time, diff, _lineNum, job, id))	
 
+def DoPreHeat(m):		
+	time = m.groups()
+	
+	print("[%8s][%8s][ %6d ] ECMgr_DoPreHeat" % (time[0], "X", _lineNum))	
+
 def PrintPage(m):		
 	id, page, time = m.groups()
 	time = int(time)	
@@ -179,11 +184,14 @@ def SearchLog(f, patterns):
 			if match_result:				
 				proc(match_result)
 
+#[00000040]@@@Parser@@@:T:31219 - ECMgr_DoPreHeat:0121 : APP_PDL ECMgr_DoPreHeat
+
 if __name__ == '__main__':	
 	patterns = [									
 			(re.compile(r'SysMgrUCO_JobStart.*ppType: (\w+),.*ID: (\d+).*Enter Time: (\d+)'), SysMgrUCO_JobStart),
 			(re.compile(r'JobMgr_JobStart: add new .*ID = (\d+), appType = (\w+)'), JobMgr_JobStart),
             (re.compile(r'_PrintPaperIn:\d+ : Report ENG_FD jobNum: (\d+), PID: (\d+).*T\((\d+)\)'), PrintPaperIn),
+			(re.compile(r'@@@Parser@@@:T:(\d+).*APP_PDL ECMgr_DoPreHeat'), DoPreHeat),
 			(re.compile(r'_PrintPage:\d+ :PID: (\d+).*Code: (\d+), T\((\d+)\)'), PrintPage),
 			(re.compile(r'_RealProcPageResult:\d+ : .*ID: (\d+),result: (\w+) reason=([-+]?\d+).*T\((\d+)\)'), RealProcPageResult),
 			(re.compile(r'SysMgrUCO_JobAbortImpl:\d+ : .*ppType: (\w+).*ID: (\d+).*Enter Time: (\d+)'), SysMgrUCO_JobAbort),

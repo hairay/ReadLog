@@ -6,6 +6,7 @@ _lineNum = 0
 _pageIdJobTime = np.zeros((256,), dtype=int)
 _pageIdTime = np.zeros((256,), dtype=int)
 _jobIdTime = np.zeros((256,), dtype=int)
+_jobIdCount = np.zeros((256,), dtype=int)
 _curJobTime = 0
 _curJobId = 0
 
@@ -21,20 +22,18 @@ def RestartMachine(m):
 
 	_curJobTime = 0
 	_curJobId = 0	
-	print("[開機時間][job 時間][行號%4d] Machine Start" % (_lineNum))
+	print("[開機時間 ][job 時間 ][行號%5d] Machine Start" % (_lineNum))
 
 def SysMgrUCO_JobStart(m):	
 	global _curJobTime	
 	global _curJobId	
 	appType, job, time = m.groups()
 	time = int(time)
-	job = int(job)		
+	job = int(job)
 	_curJobTime = time
 	diff = 0
-	if job:
-		_curJobId = job
-		if _jobIdTime[job] == 0:
-			_jobIdTime[job] = time
+	if job:		
+		_curJobId = job		
 		diff = GetMsTimeFromStart(time , _jobIdTime[job])		
 	print("[%8d][%8d][ %6d ] JobStart for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))	
 	
@@ -43,8 +42,11 @@ def JobMgr_JobStart(m):
 
 	job = int(job)
 	if job:
-		_jobIdTime[job] = _curJobTime
-	print("[%8d][%8d][ %6d ] JobStart OK [job:%3d appType:%s]" % (_curJobTime, 0, _lineNum, job, appType))
+		if _jobIdCount[job] == 0:
+			_jobIdTime[job] = _curJobTime
+		
+		_jobIdCount[job] += 1
+	print("[%8d][%8s][ %6d ] JobStart OK [job:%3d appType:%s]" % (_curJobTime, "X", _lineNum, job, appType))
 
 def SysMgrUCO_JobAbort(m):		
 	appType, job, time = m.groups()
@@ -52,7 +54,10 @@ def SysMgrUCO_JobAbort(m):
 	job = int(job)		
 	if job:		
 		diff = GetMsTimeFromStart(time , _jobIdTime[job])
-		print("[%8d][%8d][ %6d ] JobAbort for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))	
+		print("[%8d][%8d][ %6d ] JobAbort for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))
+		_jobIdCount[job] -= 1
+		if _jobIdCount[job] < 0:
+			_jobIdCount[job] = 0
 
 def SysMgrUCO_JobEnd(m):		
 	appType, job, time = m.groups()
@@ -60,7 +65,10 @@ def SysMgrUCO_JobEnd(m):
 	job = int(job)		
 	if job:		
 		diff = GetMsTimeFromStart(time , _jobIdTime[job])
-		print("[%8d][%8d][ %6d ] JobEnd for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))	
+		print("[%8d][%8d][ %6d ] JobEnd for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))
+		_jobIdCount[job] -= 1
+		if _jobIdCount[job] < 0:
+			_jobIdCount[job] = 0	
 
 def PrintPaperIn(m):		
 	job, id, time = m.groups()

@@ -62,6 +62,8 @@ def ShowM3PSensor(m):
 
 	_curTime = float(m3time)/1000.0 + _startM3pTime
 	sensorId = int(sensorId)
+	if sensorId >= max_sensor_num:
+		return None
 	sensorStatus = int(sensorStatus)
 	RecordSensorInfo(sensorId, sensorStatus, m3time)
 
@@ -75,9 +77,12 @@ def CheckVm3Sensor(m):
 	_curTime = float(m3time)/1000.0 + _startM3pTime
 
 	if sensorId not in sensorName2id:
+		while _curSensorId < max_sensor_num and sensorName[_curSensorId] != '':
+			_curSensorId += 1
+		if _curSensorId >= max_sensor_num:
+			return None
 		sensorName[_curSensorId] = sensorId
 		sensorName2id[sensorId] = _curSensorId
-		_curSensorId += 1
 
 	if sensorId in sensorName2id:
 		sensorId = sensorName2id[sensorId]
@@ -102,9 +107,12 @@ def CheckMiceSensor(m):
 	_curTime = float(m3time)/1000.0 + _startM3pTime
 
 	if sensorId not in sensorName2id:
+		while _curSensorId < max_sensor_num and sensorName[_curSensorId] != '':
+			_curSensorId += 1
+		if _curSensorId >= max_sensor_num:
+			return None
 		sensorName[_curSensorId] = sensorId
 		sensorName2id[sensorId] = _curSensorId
-		_curSensorId += 1
 
 	if sensorId in sensorName2id:
 		sensorId = sensorName2id[sensorId]
@@ -128,10 +136,10 @@ def SearchLog(f, patterns):
 
 if __name__ == '__main__':	
 	patterns = [						
-			(re.compile(r'PrintParser_SensorTestInfoCallBackProc:\d+ : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+) Enter Time: \d+'), ShowM3PSensor),
-			#(re.compile(r'UpdatePrinterSensorStatus:\d+\(Time:\d+\) : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+)'), ShowM3PSensor),			
+			(re.compile(r'PrintParser_SensorTestInfoCallBackProc:\d+ : sensor_id=(\d+), sensorStatus=(\d+), timeMS=(\d+) Enter Time: \d+'), ShowM3PSensor),			
 			(re.compile(r'PRINTER_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckVm3Sensor),
 			(re.compile(r'SENSOR_FUNC_CheckSensorStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckVm3Sensor),
+			(re.compile(r'SENSOR_FUNC_ShowStatus:\d+\((\d+)ms\) : \[Sensor\](\w+)=(\w+).*'), CheckVm3Sensor),
 			(re.compile(r'Sensor_PrintStatas:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status, RegisterSN\) = \(\d+, (\w+), \d+\). T\((\d+).*\)'), CheckMiceSensor),
 			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
 			(re.compile(r'O_EngFw_Init'), RestartM3),

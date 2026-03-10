@@ -1,12 +1,11 @@
 import sys
 import re
-import numpy as np
 
 _lineNum = 0
-_pageIdJobTime = np.zeros((256,), dtype=int)
-_pageIdTime = np.zeros((256,), dtype=int)
-_jobIdTime = np.zeros((256,), dtype=int)
-_jobIdCount = np.zeros((256,), dtype=int)
+_pageIdJobTime = {}
+_pageIdTime = {}
+_jobIdTime = {}
+_jobIdCount = {}
 _curJobTime = 0
 _curJobId = 0
 
@@ -34,7 +33,7 @@ def SysMgrUCO_JobStart(m):
 	diff = 0
 	if job:		
 		_curJobId = job		
-		diff = GetMsTimeFromStart(time , _jobIdTime[job])		
+		diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))		
 	print("[%8d][%8d][ %6d ] JobStart for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))	
 	
 def JobMgr_JobStart(m):
@@ -42,10 +41,10 @@ def JobMgr_JobStart(m):
 
 	job = int(job)
 	if job:
-		if _jobIdCount[job] == 0:
+		if _jobIdCount.get(job, 0) == 0:
 			_jobIdTime[job] = _curJobTime
 		
-		_jobIdCount[job] += 1
+		_jobIdCount[job] = _jobIdCount.get(job, 0) + 1
 	print("[%8d][%8s][ %6d ] JobStart OK [job:%3d appType:%s]" % (_curJobTime, "X", _lineNum, job, appType))
 
 def SysMgrUCO_JobAbort(m):		
@@ -53,9 +52,9 @@ def SysMgrUCO_JobAbort(m):
 	time = int(time)
 	job = int(job)		
 	if job:		
-		diff = GetMsTimeFromStart(time , _jobIdTime[job])
+		diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
 		print("[%8d][%8d][ %6d ] JobAbort for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))
-		_jobIdCount[job] -= 1
+		_jobIdCount[job] = _jobIdCount.get(job, 0) - 1
 		if _jobIdCount[job] < 0:
 			_jobIdCount[job] = 0
 
@@ -64,9 +63,9 @@ def SysMgrUCO_JobEnd(m):
 	time = int(time)
 	job = int(job)		
 	if job:		
-		diff = GetMsTimeFromStart(time , _jobIdTime[job])
+		diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
 		print("[%8d][%8d][ %6d ] JobEnd for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))
-		_jobIdCount[job] -= 1
+		_jobIdCount[job] = _jobIdCount.get(job, 0) - 1
 		if _jobIdCount[job] < 0:
 			_jobIdCount[job] = 0	
 
@@ -75,8 +74,8 @@ def PrintPaperIn(m):
 	time = int(time)
 	job = int(job)
 	id = int(id)
-	diff = GetMsTimeFromStart(time , _jobIdTime[job])
-	_pageIdJobTime[id] = _jobIdTime[job]
+	diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
+	_pageIdJobTime[id] = _jobIdTime.get(job, 0)
 	print("[%8d][%8d][ %6d ] PaperIn for [job:%3d][id:%3d]" % (time, diff, _lineNum, job, id))	
 
 def DoPreHeat(m):		
@@ -88,11 +87,11 @@ def PrintPage(m):
 	id, page, time = m.groups()
 	time = int(time)	
 	id = int(id)
-	if _pageIdTime[id] != 0 :
-		_pageIdTime[id+1] = time
-	else:	
-		_pageIdTime[id] = time
-	diff = GetMsTimeFromStart(time , _pageIdJobTime[id])
+	if id in _pageIdTime and _pageIdTime[id] != 0:
+		print("[ %6d ] Warning: Page ID %d reused/overlap. Overwriting start time." % (_lineNum, id))
+	
+	_pageIdTime[id] = time
+	diff = GetMsTimeFromStart(time , _pageIdJobTime.get(id, 0))
 	print("[%8d][%8d][ %6d ] PrintPage for [sizeCode:%s id:%3d]" % (time, diff, _lineNum, page, id))	
 
 def RealProcPageResult(m):
@@ -101,8 +100,8 @@ def RealProcPageResult(m):
 	id, result, reason, time = m.groups()
 	time = int(time)
 	id = int(id)	
-	diff = GetMsTimeFromStart(time , _pageIdJobTime[id])
-	if _pageIdTime[id] != 0 :
+	diff = GetMsTimeFromStart(time , _pageIdJobTime.get(id, 0))
+	if _pageIdTime.get(id, 0) != 0 :
 		diff2 = GetMsTimeFromStart(time , _pageIdTime[id]) / 1000.0
 		print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s] page time: %f sec S:%d" % (time, diff, _lineNum, id, result, reason, diff2, _pageIdTime[id]))
 	else:		
@@ -125,14 +124,14 @@ def PostActiveTrayErr(m):
 	job = (param3 >> 24) & 0xFF
 	paper = (param3 >> 16) & 0xFF
 	media = (param3 >> 8) & 0xFF
-	diff = GetMsTimeFromStart(time , _jobIdTime[job])
+	diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
 	print("[%8d][%8d][ %6d ] PostActiveTrayErr [tray%1d autoSel:%d paper:%2d media:%2d job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, media, job))
 
 def PcuToSys(m):	
 	msg1, msg2, param2, param3, param4, time = m.groups()
 	time = int(time)
 	
-	diff = GetMsTimeFromStart(time , _jobIdTime[_curJobId])
+	diff = GetMsTimeFromStart(time , _jobIdTime.get(_curJobId, 0))
 	print("[%8d][%8d][ %6d ] ENG_PRINT ---> SYS_MGR %s %s param2:%s param3:%s param4:%s" % (time, diff, _lineNum, msg1, msg2, param2, param3, param4))
 
 def PostPaperJamErr(m):	
@@ -144,7 +143,7 @@ def PostPaperJamErr(m):
 	autoSel = (param4 >> 8) & 0xFF
 	paper = (param4) & 0xFF
 	trayId = (param4 >> 16) & 0xFF
-	diff = GetMsTimeFromStart(time , _jobIdTime[job])
+	diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
 	print("[%8d][%8d][ %6d ] PostPaperJamErr [tray%1d autoSel:%d paper:%2d loc:%s job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, loc, job))
 
 def PostNoMatchPaper(m):	
@@ -158,7 +157,7 @@ def PostNoMatchPaper(m):
 	param3 = int(param3,16)	
 	paper = (param3 >> 16) & 0xFF
 	media = (param3 >> 8) & 0xFF
-	diff = GetMsTimeFromStart(time , _jobIdTime[job])
+	diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
 	print("[%8d][%8d][ %6d ] PostNoMatchPaper [tray%1d autoSel:%d paper:%2d media:%2d job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, media, job))
 
 def SysToPrint(m):	
@@ -208,8 +207,8 @@ if __name__ == '__main__':
 			]
 	SearchLog(sys.stdin, patterns)
 
-	for i in range(255):
-		if _pageIdTime[i] != 0 :
+	for i, time in _pageIdTime.items():
+		if time != 0 :
 			print("page %d 開始時間 %d ms，但找不到結束時間" % (i, _pageIdTime[i]))
 
     

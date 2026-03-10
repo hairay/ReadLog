@@ -1,10 +1,11 @@
 import sys
 import re
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.pyplot import MultipleLocator
 from matplotlib.backend_bases import MouseButton
 
-debugFp = open("debug.log", "a")
+debugFp = None
 _lineNum = 0
 _startTime = 0
 _curM3pTime = 0.0
@@ -20,6 +21,7 @@ _headerTwinColor7 = 'state,centerHw,centerSw,sideHw,sideSw,targetSw,time'
 _headerMice14 = 'state,centerHw,centerSw,sideHw,sideSw,envHw,envSw,EnvFuserError,EnvType,mode1,mode2,SideTherCheck,targetSw,time'
 _headerMice15 = 'state,centerHw,centerSw,sideHw,sideSw,envHw,envSw,EnvFuserError,EnvType,mode1,mode2,SideTherCheck,targetSw,PaperNip,time'
 _headerPanther = 'sideSw,centerSw,targetSw1,targetSw2,time1,time2'
+_headerRiscv = 'time,state,center,side,env,target,duty,nip'
 
 timeX = []
 centerY = []
@@ -119,6 +121,11 @@ def ShowHeatingInfoTwinColor(m):
 		targetY.append(float(m.groups(0)[7]))
 	else:
 		targetY.append(float(m.groups(0)[5]))	
+		envY.append(np.nan)
+
+	DutyY.append(np.nan)
+	NipY.append(np.nan)
+
 def ShowHeatingInfoMice(m):
 	global _startTime		
 	if _startTime == 0:
@@ -162,6 +169,30 @@ def ShowHeatingInfoPanther(m):
 	sideY.append(float(m.groups(0)[0]))
 	
 	targetY.append(float(m.groups(0)[2]))
+	envY.append(np.nan)
+	DutyY.append(np.nan)
+	NipY.append(np.nan)
+
+def ShowHeatingInfoRiscv(m):
+	global _startTime		
+	if _startTime == 0:		
+			print(_headerRiscv)
+			_startTime = float(m.group(1))/1000.0
+	
+	print("%s,%s,%s,%s,%s,%s,%s,%s" % (m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6), m.group(7), m.group(8)))
+	
+	now = float(m.group(1))/1000.0
+
+	if len(timeX) > 0 and timeX[-1] > now:		 
+			return None
+
+	timeX.append(now)
+	centerY.append(float(m.group(3)))
+	sideY.append(float(m.group(4)))
+	envY.append(float(m.group(5)))
+	targetY.append(float(m.group(6)))
+	DutyY.append(float(m.group(7)))
+	NipY.append(float(m.group(8)))
 	
 def on_move(event):
     if event.inaxes:
@@ -171,9 +202,10 @@ def on_move(event):
 
 def on_click(event):
     if event.button is MouseButton.LEFT:
-        label = "Time(Sec) " + str(event.xdata) + " " + str(event.ydata)        
-        plt.xlabel(label , fontsize=14)
-        plt.show()
+        if event.xdata is not None and event.ydata is not None:
+            label = "Time(Sec) {:.3f} {:.3f}".format(event.xdata, event.ydata)        
+            plt.xlabel(label , fontsize=14)
+            event.canvas.draw()
 
 def SearchLog(f, patterns):
 	global _lineNum
@@ -189,6 +221,7 @@ def SearchLog(f, patterns):
 #2901: [Fuser] State = 0(Initial), (TempA3, TempA4, gCtrlTempA3, gCtrlTempA4) = /185/192/0/0/ T(1936, 2194)
 
 if __name__ == '__main__':	
+	debugFp = open("debug.log", "a")
 	patterns = [													
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo13),
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+) \)'), ShowHeatingInfo14),
@@ -200,6 +233,7 @@ if __name__ == '__main__':
 			(re.compile(r'.*Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], \((\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\) gFuserTargetTemp=(\d+),Nip=(\d+), (\d+) ms'), ShowHeatingInfoMice),
 			(re.compile(r'.*Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], \((\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\) gFuserTargetTemp=(\d+),gA4FlickerMode=\d+,Nip=(\d+), (\d+)'), ShowHeatingInfoMice),			
 			(re.compile(r'\(TempA3, TempA4, gCtrlTempA3, gCtrlTempA4\) = /(\d+)/(\d+)/(\d+)/(\d+)/ T\((\d+), (\d+)\)'), ShowHeatingInfoPanther),
+			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\]\[\w+\]\(C:(\d+),S:(\d+),E:(\d+),T:(\d+),D:(\d+),N:(\d+)\),T\((\d+)\)'), ShowHeatingInfoRiscv),
 			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
 			(re.compile(r'M31:PRT Clock:'), RestartM3),
 			]
@@ -209,11 +243,11 @@ if __name__ == '__main__':
 	plt.plot(timeX, centerY, label='Center')
 	plt.plot(timeX, sideY, label='Side')
 	plt.plot(timeX, targetY, label='Target')
-	if len(envY) > 1:
+	if len(envY) > 1 and not np.isnan(envY).all():
 		plt.plot(timeX, envY, label='Env')
-	if len(DutyY) > 1:
+	if len(DutyY) > 1 and not np.isnan(DutyY).all():
 		plt.plot(timeX, DutyY, label='Duty')	
-	if len(NipY) > 1:
+	if len(NipY) > 1 and not np.isnan(NipY).all():
 		plt.plot(timeX, NipY, label='Nip')	
 		
 	plt.legend()
@@ -226,9 +260,8 @@ if __name__ == '__main__':
 	plt.ylabel("Temperature", fontsize=14)
 	plt.tick_params(axis='both', labelsize=12, color='red')
 	#binding_id = plt.connect('motion_notify_event', on_move)
-	#plt.connect('button_press_event', on_click)
+	plt.connect('button_press_event', on_click)
 	plt.savefig('curve.png', bbox_inches='tight')
 	plt.show()
 	debugFp.write("max temprature diff:%f line=%d\n" % (_tmpDiff, _tmpDiffLine))
-
-debugFp.close()
+	debugFp.close()

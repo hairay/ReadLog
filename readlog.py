@@ -209,6 +209,6 @@ if __name__ == '__main__':
 
 	for i, time in _pageIdTime.items():
 		if time != 0 :
-			print("page %d 開始時間 %d ms，但找不到結束時間" % (i, _pageIdTime[i]))
+			print("page %d start time %d ms can't find stop time" % (i, _pageIdTime[i]))
 
     

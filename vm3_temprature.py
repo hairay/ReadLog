@@ -194,6 +194,27 @@ def ShowHeatingInfoRiscv(m):
 	DutyY.append(float(m.group(7)))
 	NipY.append(float(m.group(8))*2.25+2.5)
 	
+def ShowHeatingInfoRiscvV2(m):
+	global _startTime		
+	if _startTime == 0:		
+			print(_headerRiscv)
+			_startTime = float(m.group(1))/1000.0
+	
+	print("%s,%s,%s,%s,%s,%s,%s,%s" % (m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(8), m.group(6), m.group(11)))
+	
+	now = float(m.group(1))/1000.0
+
+	if len(timeX) > 0 and timeX[-1] > now:		 
+			return None
+
+	timeX.append(now)
+	centerY.append(float(m.group(3)))
+	sideY.append(float(m.group(4)))
+	envY.append(float(m.group(5)))
+	targetY.append(float(m.group(8)))
+	DutyY.append(float(m.group(6)))
+	NipY.append(float(m.group(11))*2.25+2.5)
+
 def on_move(event):
     if event.inaxes:
         print(f'data coords {event.xdata} {event.ydata},',
@@ -234,6 +255,7 @@ if __name__ == '__main__':
 			(re.compile(r'.*Fuser_Action_ISR_ADC_Temp:\d+ : \[(\w+)\], \((\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\) gFuserTargetTemp=(\d+),gA4FlickerMode=\d+,Nip=(\d+), (\d+)'), ShowHeatingInfoMice),			
 			(re.compile(r'\(TempA3, TempA4, gCtrlTempA3, gCtrlTempA4\) = /(\d+)/(\d+)/(\d+)/(\d+)/ T\((\d+), (\d+)\)'), ShowHeatingInfoPanther),
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\]\[\w+\]\(C:(\d+),S:(\d+),E:(\d+),T:(\d+),D:(\d+),N:(\d+)\),T\((\d+)\)'), ShowHeatingInfoRiscv),
+			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\]\[\w+\]\(C:(\d+),S:(\d+),E:(\d+),D:(\d+),EF:(\d+),T:(\d+),CP:(\d+),SP:(\d+),N:(\d+)\),T\((\d+)\)'), ShowHeatingInfoRiscvV2),
 			(re.compile(r'PRINTER_FUNC_InitDebugLog'), RestartM3),
 			(re.compile(r'M31:PRT Clock:'), RestartM3),
 			]

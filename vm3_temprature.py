@@ -147,7 +147,7 @@ def ShowHeatingInfoMice(m):
 	sideY.append(float(m.groups(0)[4]))
 	DutyY.append(float(m.groups(0)[11]))
 	targetY.append(float(m.groups(0)[12]))
-	NipY.append(float(m.groups(0)[13])*245+5.0)
+	NipY.append(float(m.groups(0)[13])*2.25+2.5)
 	envY.append(float(m.groups(0)[6]))
 
 
@@ -192,7 +192,7 @@ def ShowHeatingInfoRiscv(m):
 	envY.append(float(m.group(5)))
 	targetY.append(float(m.group(6)))
 	DutyY.append(float(m.group(7)))
-	NipY.append(float(m.group(8)))
+	NipY.append(float(m.group(8))*2.25+2.5)
 	
 def on_move(event):
     if event.inaxes:

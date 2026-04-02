@@ -88,7 +88,10 @@ def PrintPage(m):
 	time = int(time)	
 	id = int(id)
 	if id in _pageIdTime and _pageIdTime[id] != 0:
-		print("[ %6d ] Warning: Page ID %d reused/overlap. Overwriting start time." % (_lineNum, id))
+		#print("[ %6d ] Warning: Page ID %d reused/overlap. Overwriting start time." % (_lineNum, id))
+		id += 1
+		if id >= 128:
+			id = 1
 	
 	_pageIdTime[id] = time
 	diff = GetMsTimeFromStart(time , _pageIdJobTime.get(id, 0))

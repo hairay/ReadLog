@@ -8,6 +8,7 @@ _jobIdTime = {}
 _jobIdCount = {}
 _curJobTime = 0
 _curJobId = 0
+_waitApiRetList = []
 
 def GetMsTimeFromStart(curTime, startTime):
 	if curTime >= startTime:
@@ -176,6 +177,16 @@ def McuErrorLog(m):
 	print("[%8s][%8s][ %6d ] MCU error log owner:%s error:%s status:%s param1:%s param2:%s gSCState:%s" % ('xxx', 'xxx', _lineNum, owner, error, status, param1, param2, gSCState))
 
 
+def WaitApiRet(m):
+    global _lineNum
+    callApiID, apiRet, time = m.groups()
+    callApiID = int(callApiID)
+    apiRet = int(apiRet)
+    time = int(time)
+    diff = GetMsTimeFromStart(time, callApiID)
+    _waitApiRetList.append((callApiID, time, diff, _lineNum))
+    print("[%8d][%8d][ %6d ] _waitApiRet [callApiID:%d apiRet:%d]" % (time, diff, _lineNum, callApiID, apiRet))
+
 def SearchLog(f, patterns):
 	global _lineNum
 	for line in f:   
@@ -207,8 +218,15 @@ if __name__ == '__main__':
 			(re.compile(r'StateCenter_ErrorMessageSend_Line:\d+ : owner=(\d+), error=(\d+), status=(\d+), param1=(\d+), param2=(\w+), gSCState=(\d+)'), McuErrorLog),
 			(re.compile(r'Main Program Start'), RestartMachine),
 			(re.compile(r'DSP_IP_Init'), RestartMachine),
+			(re.compile(r'_waitApiRet:\d+ : engApiRet\.callApiID=(\d+),engApiRet\.apiRet=(\d+), T\((\d+)\)'), WaitApiRet),
 			]
 	SearchLog(sys.stdin, patterns)
+	
+	_waitApiRetList.sort(key=lambda x: x[2], reverse=True)
+	print("\n=== Top 10 longest _waitApiRet calls ===")
+	print("%-8s %-12s %-12s %-10s %s" % ("Rank", "CallApiID", "StartTime", "Duration", "Line"))
+	for idx, (cid, st, dur, ln) in enumerate(_waitApiRetList[:10]):
+		print("%-8d %-12d %-12d %-10d %d" % (idx+1, cid, st, dur, ln))
 
 	for i, time in _pageIdTime.items():
 		if time != 0 :

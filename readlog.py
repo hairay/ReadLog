@@ -9,6 +9,7 @@ _jobIdCount = {}
 _curJobTime = 0
 _curJobId = 0
 _waitApiRetList = []
+_jobLineRanges = []
 
 def GetMsTimeFromStart(curTime, startTime):
 	if curTime >= startTime:
@@ -34,7 +35,8 @@ def SysMgrUCO_JobStart(m):
 	diff = 0
 	if job:		
 		_curJobId = job		
-		diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))		
+		diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
+		_jobLineRanges.append({'job': job, 'appType': appType, 'start': _lineNum, 'end': None})
 	print("[%8d][%8d][ %6d ] JobStart for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))	
 	
 def JobMgr_JobStart(m):
@@ -58,6 +60,10 @@ def SysMgrUCO_JobAbort(m):
 		_jobIdCount[job] = _jobIdCount.get(job, 0) - 1
 		if _jobIdCount[job] < 0:
 			_jobIdCount[job] = 0
+		for entry in reversed(_jobLineRanges):
+			if entry['job'] == job and entry['end'] is None:
+				entry['end'] = _lineNum
+				break
 
 def SysMgrUCO_JobEnd(m):		
 	appType, job, time = m.groups()
@@ -68,7 +74,11 @@ def SysMgrUCO_JobEnd(m):
 		print("[%8d][%8d][ %6d ] JobEnd for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))
 		_jobIdCount[job] = _jobIdCount.get(job, 0) - 1
 		if _jobIdCount[job] < 0:
-			_jobIdCount[job] = 0	
+			_jobIdCount[job] = 0
+		for entry in reversed(_jobLineRanges):
+			if entry['job'] == job and entry['end'] is None:
+				entry['end'] = _lineNum
+				break	
 
 def PrintPaperIn(m):		
 	job, id, time = m.groups()
@@ -230,6 +240,13 @@ if __name__ == '__main__':
 
 	for i, time in _pageIdTime.items():
 		if time != 0 :
-			print("page %d start time %d ms can't find stop time" % (i, _pageIdTime[i]))
+			print("page %d start time %d ms can't stop time" % (i, _pageIdTime[i]))
 
+	print("\n=== Job Line Ranges ===")
+	print("%-6s %-10s %-10s %-10s" % ("Job", "AppType", "StartLine", "EndLine"))
+	for entry in _jobLineRanges:
+		endStr = str(entry['end']) if entry['end'] is not None else "N/A"
+		print("%-6d %-10s %-10d %-10s" % (entry['job'], entry['appType'], entry['start'], endStr))
+
+    
     

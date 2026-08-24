@@ -30,6 +30,7 @@ type logfile.txt | python vm3_sensor.py       :: 產生 curve.png
 .\mice.bat          :: micelog.exe（產生 .log 後自動改名）
 .\twin.bat          :: twincolor.exe（產生 .log 後自動改名）
 .\start_forward.bat :: 背景啟動 outlook_forward_service.py
+.\stop_forward.bat  :: 只停止 outlook_forward_service（不會誤殺其他 python）
 ```
 
 ---
@@ -67,7 +68,7 @@ type logfile.txt | python vm3_sensor.py       :: 產生 curve.png
 安裝方式：
 
 ```batch
-pip install -r requirements.log
+pip install -r requirements.txt
 ```
 
 ---
@@ -75,7 +76,7 @@ pip install -r requirements.log
 ## 注意事項
 
 - **PNG 產生與視窗顯示**：`vm3_sensor.py`、`mcu_in_out.py`、`vm3_temprature.py` 預設產生 `curve.png` 並在背景關閉視窗，不會阻斷批次處理。如需開啟圖形介面檢視，可加上 `--show` 參數。
-- **輸出檔不納入版本控制**：`*.log`、`*.png`、`*.csv` 皆已在 `.gitignore` 中，只有 `log/` 下已提交的範例外。
+- **輸出檔不納入版本控制**：`*.log`、`*.png`、`*.csv` 及根目錄的 `*.txt` 皆已在 `.gitignore` 中；`log/` 下的 `*.txt` 不受忽略，可作為範例 log 提交。
 - **平台術語**：Log 中常見的 M3/M3P、VM3、Mice、TwinColor、Panther、Riscv 等詞彙，代表不同的印表機平台或韌體分支。
 
 ---

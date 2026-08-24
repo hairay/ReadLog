@@ -1,7 +1,5 @@
 import sys
 import re
-import matplotlib.pyplot as plt
-import numpy as np
 
 max_sensor_num = 35
 sensorName=['MANUAL_TRAY','MAIN_TRAY','SECOND_TRAY','THIRD_TRAY','FOURTH_TRAY','PAPER_DETECT_1','PAPER_DETECT_2',
@@ -61,7 +59,7 @@ def CheckMiceOutput(m):
 		print("%s,%s,%s,%s,%s,%s,%s,%s,%s"%("Name", "ID", "state","time(ms)","time(us)","line","osDiff","hwDiff", "Diff"))		
 
 	if _curTime == 0 or m3time == 0 :
-		print("%s,%d,%d,%d,%d,%s"%(sensorName[sensorId], sensorId, sensorStatus,m3time,m3UsTime,_lineNum))		
+		print("%s,%d,%d,%d,%d,%s,,,"%(sensorName[sensorId], sensorId, sensorStatus,m3time,m3UsTime,_lineNum))		
 	else:
 		msDiff = GetMsTimeFromStart(m3time, oldM3Time)
 		usDiff = GetMsTimeFromStart(m3UsTime, oldM3UsTime)/1000

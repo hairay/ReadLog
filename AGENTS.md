@@ -23,13 +23,16 @@ Batch wrappers (`Auto*.bat`, `KeyWord.bat`) iterate over all `*.txt` in `.` and 
 .\KeyWord.bat       :: read_key_word.py → *-keyword.log
 ```
 
+`start_forward.bat` / `stop_forward.bat` manage the Outlook auto-forwarding service (`outlook_forward_service.py`). `stop_forward.bat` only kills processes whose command line contains `outlook_forward_service` — never use `taskkill /f /im python.exe`.
+
 ## Dependencies
 
 - **stdlib only:** `readlog.py`, `memory.py`, `IO_CtrlTable.py`, `qbitScanBand.py`, `read_key_word.py`
 - **matplotlib + numpy:** `vm3_sensor.py`, `mcu_in_out.py`, `vm3_temprature.py`
 - **win32com + python-docx:** `find_word_doc.py`, `find_word_docx.py`
+- **win32com:** `outlook_forward_service.py`
 
-Install as needed: `pip install matplotlib numpy pywin32 python-docx`
+Install as needed: `pip install -r requirements.txt`
 
 ## Scripts that generate PNGs
 
@@ -37,7 +40,7 @@ Install as needed: `pip install matplotlib numpy pywin32 python-docx`
 
 ## Shared patterns
 
-- **`SearchLog(f, patterns)`** dispatches lines through `[(compiled_regex, handler_func), ...]` tuples. Global `_lineNum` is incremented per line.
+- **`SearchLog(f, patterns)`** dispatches lines through `[(compiled_regex, handler_func), ...]` tuples and stops at the **first matching pattern** (all scripts `break` after dispatch). Put specific patterns before generic catch-alls. Global `_lineNum` is incremented per line.
 - **`GetMsTimeFromStart(cur, start)`** handles 32-bit timer wraparound (`0xFFFFFFFF`).
 - No tests, no linting, no type checking, no CI.
 
@@ -54,14 +57,14 @@ Install as needed: `pip install matplotlib numpy pywin32 python-docx`
 
 ## Working tree state
 
-`readlog.py` has uncommitted modifications (adds `_waitApiRetList` tracking + a top-10 longest-wait summary). `ANLOG.exe`, `Print_Job.exe`, `Print_Job_config.json` are untracked.
+`cat2.exe`, `micelog.exe`, `twincolor.exe` (and two `.docx` docs) are tracked legacy binaries/docs committed before the `*.exe` ignore rule. `ANLOG.exe`, `Print_Job.exe`, `forward_sent.json`, `Print_Job_config.json` exist locally but are gitignored/untracked — do not add them.
 
 ## Output files are gitignored
 
-`*.log`, `*.txt`, `*.png`, `*.csv` are all in `.gitignore`. Log input files (`*.txt`) and all generated output are not tracked (except the sample under `log/` which was committed before the rule).
+`*.log`, `*.txt`, `*.png`, `*.csv` are all in `.gitignore`. Log input files (`*.txt`) and all generated output are not tracked. Sample logs placed under `log/` as `*.txt` are deliberately NOT ignored (via `!log/*.txt`) so they can be committed.
 
 ## Repo structure
 
 - **1 branch:** `master`
 - **2 remotes:** `origin` (GitLab), `github` (GitHub mirror)
-- **No package/module hierarchy** — flat scripts, no `pyproject.toml`, no `requirements.txt`
+- **No package/module hierarchy** — flat scripts, no `pyproject.toml`, dependencies in `requirements.txt`

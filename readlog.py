@@ -20,9 +20,17 @@ def GetMsTimeFromStart(curTime, startTime):
 def RestartMachine(m):
 	global _curJobTime
 	global _curJobId
+	global _jobIdTime
+	global _jobIdCount
+	global _pageIdJobTime
+	global _pageIdTime
 
 	_curJobTime = 0
 	_curJobId = 0	
+	_jobIdTime = {}
+	_jobIdCount = {}
+	_pageIdJobTime = {}
+	_pageIdTime = {}
 	print("[開機時間 ][job 時間 ][行號%5d] Machine Start" % (_lineNum))
 
 def SysMgrUCO_JobStart(m):	
@@ -98,17 +106,13 @@ def PrintPage(m):
 	time = int(time)	
 	id = int(id)
 	if id in _pageIdTime and _pageIdTime[id] != 0:
-		#print("[ %6d ] Warning: Page ID %d reused/overlap. Overwriting start time." % (_lineNum, id))
-		id += 1
-		if id >= 128:
-			id = 1
+		print("[ %6d ] Warning: Page ID %d reused/overlap. Overwriting start time." % (_lineNum, id), file=sys.stderr)
 	
 	_pageIdTime[id] = time
 	diff = GetMsTimeFromStart(time, _pageIdJobTime.get(id, 0))
 	print("[%8d][%8d][ %6d ] PrintPage for [sizeCode:%s id:%3d]" % (time, diff, _lineNum, page, id))	
 
 def RealProcPageResult(m):
-	global _lineNum
 	id, result, reason, time = m.groups()
 	time = int(time)
 	id = int(id)	
@@ -181,7 +185,6 @@ def McuErrorLog(m):
 	print("[%8s][%8s][ %6d ] MCU error log owner:%s error:%s status:%s param1:%s param2:%s gSCState:%s" % ('xxx', 'xxx', _lineNum, owner, error, status, param1, param2, gSCState))
 
 def WaitApiRet(m):
-	global _lineNum
 	callApiID, apiRet, time = m.groups()
 	callApiID = int(callApiID)
 	apiRet = int(apiRet)
@@ -199,6 +202,7 @@ def SearchLog(f, patterns):
 			match_result = pat.search(line)
 			if match_result:				
 				proc(match_result)
+				break
 
 if __name__ == '__main__':	
 	patterns = [									
@@ -213,9 +217,9 @@ if __name__ == '__main__':
 			(re.compile(r'SYS_MGR ---> ENG_PRINT   , {(\w+) (\w+)} {(\w+) (\w+) (\w+)} (\d+)'), SysToPrint),
 			(re.compile(r'_ReportTrayInfo_:\d+ : tray (\d+).*paper exist: (\d+).*T\((\d+)\)'), ReportTrayInfo),
 			(re.compile(r'_PostActiveTrayEr: Post EVENT:    ENG_PRINT ---> SYS_MGR     , {ERR E_ACTIVE_TRAY} {(\w+) (\w+) \w+} (\d+)'), PostActiveTrayErr),
-			(re.compile(r'.*ENG_PRINT ---> SYS_MGR     , {(\w+) (\w+)} {(\w+) (\w+) (\w+)} (\d+)'), PcuToSys),
 			(re.compile(r'PostJamWithPageS: .*_JAM} {(\w+) (\w+) (\w+)} (\d+)'), PostPaperJamErr),
 			(re.compile(r'PostNoMatchPaper: .*_NO_MATCH_PAPER} {(\w+) (\w+) (\w+)} (\d+)'), PostNoMatchPaper),
+			(re.compile(r'.*ENG_PRINT ---> SYS_MGR     , {(\w+) (\w+)} {(\w+) (\w+) (\w+)} (\d+)'), PcuToSys),
 			(re.compile(r'StateCenter_ErrorMessageSend_Line:\d+ : owner=(\d+), error=(\d+), status=(\d+), param1=(\d+), param2=(\w+), gSCState=(\d+)'), McuErrorLog),
 			(re.compile(r'Main Program Start'), RestartMachine),
 			(re.compile(r'DSP_IP_Init'), RestartMachine),

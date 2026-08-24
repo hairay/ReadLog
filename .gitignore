@@ -1,14 +1,12 @@
 # Log and output files
 *.log
-!requirements.log
 *.png
 *.csv
-debug.log
 debug/
-log/
 
-# Text log input files (except committed samples under log/)
+# Text log input files (except requirements and sample logs under log/)
 *.txt
+!requirements.txt
 log/*
 !log/*.txt
 

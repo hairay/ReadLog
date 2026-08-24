@@ -23,6 +23,8 @@ def received_band(m):
 	
 	if phyAddr not in phyAddr2Size:
 		print("[ %6d ] wrong %s %s %s" % (_lineNum, phyAddr, count, time))
+	else:
+		del phyAddr2Size[phyAddr]
 	received_band_num += 1
 
 def SearchLog(f, patterns):

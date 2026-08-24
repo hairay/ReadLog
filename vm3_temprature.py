@@ -100,7 +100,7 @@ def ShowHeatingInfoTwinColor(m):
 			print(_headerTwinColor12)
 		else:
 			print(_headerTwinColor)
-	_startTime = float(m.groups(0)[-1])/1000.0
+		_startTime = float(m.groups(0)[-1])/1000.0
 	if len(m.groups(0)) == 7:	
 		print("%s,%s,%s,%s,%s,%s,%s" % (m.groups()))
 	elif len(m.groups(0)) == 12:	
@@ -147,7 +147,10 @@ def ShowHeatingInfoMice(m):
 	sideY.append(float(m.groups(0)[4]))
 	DutyY.append(float(m.groups(0)[11]))
 	targetY.append(float(m.groups(0)[12]))
-	NipY.append(float(m.groups(0)[13])*2.25+2.5)
+	if len(m.groups(0)) == 15:
+		NipY.append(float(m.groups(0)[13])*2.25+2.5)
+	else:
+		NipY.append(np.nan)
 	envY.append(float(m.groups(0)[6]))
 
 
@@ -155,7 +158,7 @@ def ShowHeatingInfoPanther(m):
 	global _startTime		
 	if _startTime == 0:		
 			print(_headerPanther)
-	_startTime = float(m.groups(0)[-2])/1000.0
+			_startTime = float(m.groups(0)[-2])/1000.0
 	
 	print("%s,%s,%s,%s,%s,%s" % (m.groups()))
 	
@@ -242,7 +245,7 @@ def SearchLog(f, patterns):
 #2901: [Fuser] State = 0(Initial), (TempA3, TempA4, gCtrlTempA3, gCtrlTempA4) = /185/192/0/0/ T(1936, 2194)
 
 if __name__ == '__main__':	
-	debugFp = open("debug.log", "a")
+	debugFp = open("debug.log", "w")
 	patterns = [													
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+) \)'), ShowHeatingInfo13),
 			(re.compile(r'FUSER_FUNC_ShowHeatingInfo:\d+\((\d+)ms\) : \[(\w+)\], \( (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+), (-?\d+) \)'), ShowHeatingInfo14),

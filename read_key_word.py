@@ -15,6 +15,7 @@ def SearchLog(f, patterns):
 			match_result = pat.search(line)
 			if match_result:				
 				proc(line)
+				break
 
 if __name__ == '__main__':	
 	patterns = [												

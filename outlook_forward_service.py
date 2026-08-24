@@ -16,6 +16,7 @@ POLL_INTERVAL = int(os.environ.get("FORWARD_POLL_INTERVAL", "10"))
 LOOKBACK_SECONDS = int(os.environ.get("FORWARD_LOOKBACK_SEC", "7200"))  # Default lookback 2 hours
 FORWARD_TARGET_EMAIL = os.environ.get("FORWARD_TARGET_EMAIL", "hairay@gmail.com")
 FORWARD_KEYWORD = os.environ.get("FORWARD_KEYWORD", "hairay").lower()
+MAX_SEND_RETRIES = int(os.environ.get("FORWARD_MAX_RETRIES", "3"))
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SENT_FILE = os.path.join(SCRIPT_DIR, "forward_sent.json")
@@ -62,6 +63,8 @@ def main():
 
     sent_ids_list = load_sent()
     sent_ids_set = set(sent_ids_list)
+    fail_counts = {}
+    dirty = False
 
     print(f"Outlook forwarding service started. (Target: {FORWARD_TARGET_EMAIL}, Keyword filter: {FORWARD_KEYWORD})", flush=True)
 
@@ -80,20 +83,35 @@ def main():
                         break
                     eid = getattr(item, 'EntryID', None)
                     if eid and eid not in sent_ids_set and should_forward(item):
-                        fwd = item.Forward()
-                        fwd.Recipients.Add(FORWARD_TARGET_EMAIL)
-                        fwd.Recipients.ResolveAll()
-                        fwd.Send()
-                        sent_ids_set.add(eid)
-                        sent_ids_list.append(eid)
-                        print(f"[FORWARDED] {getattr(item, 'Subject', '(No Subject)')}", flush=True)
+                        try:
+                            fwd = item.Forward()
+                            fwd.Recipients.Add(FORWARD_TARGET_EMAIL)
+                            if not fwd.Recipients.ResolveAll():
+                                raise RuntimeError("could not resolve recipient")
+                            fwd.Send()
+                            sent_ids_set.add(eid)
+                            sent_ids_list.append(eid)
+                            fail_counts.pop(eid, None)
+                            dirty = True
+                            print(f"[FORWARDED] {getattr(item, 'Subject', '(No Subject)')}", flush=True)
+                        except Exception as e:
+                            fail_counts[eid] = fail_counts.get(eid, 0) + 1
+                            if fail_counts[eid] >= MAX_SEND_RETRIES:
+                                sent_ids_set.add(eid)
+                                sent_ids_list.append(eid)
+                                dirty = True
+                                print(f"[GAVE UP after {fail_counts[eid]} attempts] {getattr(item, 'Subject', '(No Subject)')}: {e}", flush=True)
+                            else:
+                                print(f"[SKIPPED attempt {fail_counts[eid]}] {getattr(item, 'Subject', '(No Subject)')}: {e}", flush=True)
                 except Exception as e:
                     print(f"[SKIPPED] {e}", flush=True)
                 item = items.GetNext()
         except Exception as e:
             print(f"[ERROR] Poll error: {e}", flush=True)
 
-        save_sent(sent_ids_list)
+        if dirty:
+            save_sent(sent_ids_list)
+            dirty = False
         time.sleep(POLL_INTERVAL)
 
 if __name__ == "__main__":

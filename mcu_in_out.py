@@ -90,9 +90,9 @@ def SearchLog(f, patterns):
 
 if __name__ == '__main__':	
 	patterns = [									
-			(re.compile(r'IO_CtrlTable_SetValue:\d+ : (\w+) id=\d+ state=(\d+) T\((\d+)\).*'), CheckMiceSensor),
-			(re.compile(r'Sensor_PrintStatas:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status, RegisterSN\) = \(\d+, (\w+), \d+\). T\((\d+).*\)'), CheckMiceSensor),
-			(re.compile(r'Sensor_RegisterWithDebounceTime:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status\) = \(\d+, (\w+)\). T\((\d+).*\)'), CheckMiceSensor),
+			(re.compile(r'IO_CtrlTable_SetValue:\d+ : (\w+) id=\d+ state=(\d+) (?:ms)?T\((\d+)\).*'), CheckMiceSensor),
+			(re.compile(r'Sensor_PrintStatas:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status, RegisterSN\) = \(\d+, (\w+), \d+\)\.\s*(?:ms)?T\((\d+).*\)'), CheckMiceSensor),
+			(re.compile(r'Sensor_RegisterWithDebounceTime:\d+ : \[Sensor\] (\w+)\(Sensor Type, Status\) = \(\d+, (\w+)\)\.\s*(?:ms)?T\((\d+).*\)'), CheckMiceSensor),
 			(re.compile(r'M31:PRT Clock:'), RestartM3)
 			]
 	print("%40s %6s %8s %12s %12s" % ("Name", "ID", "state","time(us)","line"))

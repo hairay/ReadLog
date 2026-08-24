@@ -15,7 +15,7 @@ def GetMsTimeFromStart(curTime, startTime):
 	if curTime >= startTime:
 		return curTime - startTime
 	else:	
-		return ( 0xFFFFFFFF - startTime + curTime+1)
+		return (0xFFFFFFFF - startTime + curTime + 1)
 
 def RestartMachine(m):
 	global _curJobTime
@@ -35,12 +35,12 @@ def SysMgrUCO_JobStart(m):
 	diff = 0
 	if job:		
 		_curJobId = job		
-		diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
+		diff = GetMsTimeFromStart(time, _jobIdTime.get(job, 0))
 		_jobLineRanges.append({'job': job, 'appType': appType, 'start': _lineNum, 'end': None})
 	print("[%8d][%8d][ %6d ] JobStart for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))	
 	
 def JobMgr_JobStart(m):
-	job , appType= m.groups()
+	job, appType = m.groups()
 
 	job = int(job)
 	if job:
@@ -55,7 +55,7 @@ def SysMgrUCO_JobAbort(m):
 	time = int(time)
 	job = int(job)		
 	if job:		
-		diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
+		diff = GetMsTimeFromStart(time, _jobIdTime.get(job, 0))
 		print("[%8d][%8d][ %6d ] JobAbort for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))
 		_jobIdCount[job] = _jobIdCount.get(job, 0) - 1
 		if _jobIdCount[job] < 0:
@@ -70,7 +70,7 @@ def SysMgrUCO_JobEnd(m):
 	time = int(time)
 	job = int(job)		
 	if job:		
-		diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
+		diff = GetMsTimeFromStart(time, _jobIdTime.get(job, 0))
 		print("[%8d][%8d][ %6d ] JobEnd for [job:%3d appType:%s]" % (time, diff, _lineNum, job, appType))
 		_jobIdCount[job] = _jobIdCount.get(job, 0) - 1
 		if _jobIdCount[job] < 0:
@@ -85,13 +85,12 @@ def PrintPaperIn(m):
 	time = int(time)
 	job = int(job)
 	id = int(id)
-	diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
+	diff = GetMsTimeFromStart(time, _jobIdTime.get(job, 0))
 	_pageIdJobTime[id] = _jobIdTime.get(job, 0)
 	print("[%8d][%8d][ %6d ] PaperIn for [job:%3d][id:%3d]" % (time, diff, _lineNum, job, id))	
 
 def DoPreHeat(m):		
 	time = m.groups()
-	
 	print("[%8s][%8s][ %6d ] ECMgr_DoPreHeat" % (time[0], "X", _lineNum))	
 
 def PrintPage(m):		
@@ -105,18 +104,17 @@ def PrintPage(m):
 			id = 1
 	
 	_pageIdTime[id] = time
-	diff = GetMsTimeFromStart(time , _pageIdJobTime.get(id, 0))
+	diff = GetMsTimeFromStart(time, _pageIdJobTime.get(id, 0))
 	print("[%8d][%8d][ %6d ] PrintPage for [sizeCode:%s id:%3d]" % (time, diff, _lineNum, page, id))	
 
 def RealProcPageResult(m):
 	global _lineNum
-
 	id, result, reason, time = m.groups()
 	time = int(time)
 	id = int(id)	
-	diff = GetMsTimeFromStart(time , _pageIdJobTime.get(id, 0))
-	if _pageIdTime.get(id, 0) != 0 :
-		diff2 = GetMsTimeFromStart(time , _pageIdTime[id]) / 1000.0
+	diff = GetMsTimeFromStart(time, _pageIdJobTime.get(id, 0))
+	if _pageIdTime.get(id, 0) != 0:
+		diff2 = GetMsTimeFromStart(time, _pageIdTime[id]) / 1000.0
 		print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s] page time: %f sec S:%d" % (time, diff, _lineNum, id, result, reason, diff2, _pageIdTime[id]))
 	else:		
 		print("[%8d][%8d][ %6d ] Finish page [id:%3d result:%s reason:%s] page time:無開始時間" % (time, diff, _lineNum, id, result, reason))
@@ -125,95 +123,88 @@ def RealProcPageResult(m):
 def ReportTrayInfo(m):	
 	trayId, exist, time = m.groups()
 	time = int(time)
-	
-	diff = GetMsTimeFromStart(time , _curJobTime)
+	diff = GetMsTimeFromStart(time, _curJobTime)
 	print("[%8d][%8d][ %6d ] ReportTrayInfo [tray%s:%s job:%3d]" % (time, diff, _lineNum, trayId, exist, _curJobId))
 
 def PostActiveTrayErr(m):	
 	param2, param3, time = m.groups()
 	time = int(time)
-	autoSel = (int(param2,16) >> 15) & 0x1
-	trayId = (int(param2,16) >> 16) & 0xFF
-	param3 = int(param3,16)
+	autoSel = (int(param2, 16) >> 15) & 0x1
+	trayId = (int(param2, 16) >> 16) & 0xFF
+	param3 = int(param3, 16)
 	job = (param3 >> 24) & 0xFF
 	paper = (param3 >> 16) & 0xFF
 	media = (param3 >> 8) & 0xFF
-	diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
+	diff = GetMsTimeFromStart(time, _jobIdTime.get(job, 0))
 	print("[%8d][%8d][ %6d ] PostActiveTrayErr [tray%1d autoSel:%d paper:%2d media:%2d job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, media, job))
 
 def PcuToSys(m):	
 	msg1, msg2, param2, param3, param4, time = m.groups()
 	time = int(time)
-	
-	diff = GetMsTimeFromStart(time , _jobIdTime.get(_curJobId, 0))
+	diff = GetMsTimeFromStart(time, _jobIdTime.get(_curJobId, 0))
 	print("[%8d][%8d][ %6d ] ENG_PRINT ---> SYS_MGR %s %s param2:%s param3:%s param4:%s" % (time, diff, _lineNum, msg1, msg2, param2, param3, param4))
 
 def PostPaperJamErr(m):	
 	loc, param3, param4, time = m.groups()
 	time = int(time)		
-	param3 = int(param3,16)
+	param3 = int(param3, 16)
 	job = (param3 >> 16) & 0xFF
-	param4 = int(param4,16)
+	param4 = int(param4, 16)
 	autoSel = (param4 >> 8) & 0xFF
 	paper = (param4) & 0xFF
 	trayId = (param4 >> 16) & 0xFF
-	diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
+	diff = GetMsTimeFromStart(time, _jobIdTime.get(job, 0))
 	print("[%8d][%8d][ %6d ] PostPaperJamErr [tray%1d autoSel:%d paper:%2d loc:%s job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, loc, job))
 
 def PostNoMatchPaper(m):	
 	param2, param3, param4, time = m.groups()
 	time = int(time)		
-	param2 = int(param2,16)
+	param2 = int(param2, 16)
 	job = (param2 >> 16) & 0xFF
 	trayId = (param2 >> 8) & 0xFF
 	autoSel = (param2) & 0xFF
 
-	param3 = int(param3,16)	
+	param3 = int(param3, 16)	
 	paper = (param3 >> 16) & 0xFF
 	media = (param3 >> 8) & 0xFF
-	diff = GetMsTimeFromStart(time , _jobIdTime.get(job, 0))
+	diff = GetMsTimeFromStart(time, _jobIdTime.get(job, 0))
 	print("[%8d][%8d][ %6d ] PostNoMatchPaper [tray%1d autoSel:%d paper:%2d media:%2d job:%3d]" % (time, diff, _lineNum, trayId, autoSel, paper, media, job))
 
 def SysToPrint(m):	
 	msg1, reqMsg, param2, param3, param4, time = m.groups()
 	time = int(time)	
-	
-	diff = GetMsTimeFromStart(time , _curJobTime)
+	diff = GetMsTimeFromStart(time, _curJobTime)
 	print("[%8d][%8d][ %6d ] SYS_MGR ---> ENG_PRINT %s %s param2:%s param3:%s param4:%s" % (time, diff, _lineNum, msg1, reqMsg, param2, param3, param4))
 
 def McuErrorLog(m):	
 	owner, error, status, param1, param2, gSCState = m.groups()
-	
 	print("[%8s][%8s][ %6d ] MCU error log owner:%s error:%s status:%s param1:%s param2:%s gSCState:%s" % ('xxx', 'xxx', _lineNum, owner, error, status, param1, param2, gSCState))
 
-
 def WaitApiRet(m):
-    global _lineNum
-    callApiID, apiRet, time = m.groups()
-    callApiID = int(callApiID)
-    apiRet = int(apiRet)
-    time = int(time)
-    diff = GetMsTimeFromStart(time, callApiID)
-    _waitApiRetList.append((callApiID, time, diff, _lineNum))
-    print("[%8d][%8d][ %6d ] _waitApiRet [callApiID:%d apiRet:%d]" % (time, diff, _lineNum, callApiID, apiRet))
+	global _lineNum
+	callApiID, apiRet, time = m.groups()
+	callApiID = int(callApiID)
+	apiRet = int(apiRet)
+	time = int(time)
+	diff = GetMsTimeFromStart(time, callApiID)
+	_waitApiRetList.append((callApiID, time, diff, _lineNum))
+	print("[%8d][%8d][ %6d ] _waitApiRet [callApiID:%d apiRet:%d]" % (time, diff, _lineNum, callApiID, apiRet))
 
 def SearchLog(f, patterns):
 	global _lineNum
 	for line in f:   
-		_lineNum +=1
+		_lineNum += 1
 		for mp in patterns:
 			pat, proc = mp
 			match_result = pat.search(line)
 			if match_result:				
 				proc(match_result)
 
-#[00000040]@@@Parser@@@:T:31219 - ECMgr_DoPreHeat:0121 : APP_PDL ECMgr_DoPreHeat
-
 if __name__ == '__main__':	
 	patterns = [									
 			(re.compile(r'SysMgrUCO_JobStart.*ppType: (\w+),.*ID: (\d+).*Enter Time: (\d+)'), SysMgrUCO_JobStart),
 			(re.compile(r'JobMgr_JobStart: add new .*ID = (\d+), appType = (\w+)'), JobMgr_JobStart),
-            (re.compile(r'_PrintPaperIn:\d+ : Report ENG_FD jobNum: (\d+), PID: (\d+).*T\((\d+)\)'), PrintPaperIn),
+			(re.compile(r'_PrintPaperIn:\d+ : Report ENG_FD jobNum: (\d+), PID: (\d+).*T\((\d+)\)'), PrintPaperIn),
 			(re.compile(r'@@@Parser@@@:T:(\d+).*APP_PDL ECMgr_DoPreHeat'), DoPreHeat),
 			(re.compile(r'_PrintPage:\d+ :PID: (\d+).*Code: (\d+), T\((\d+)\)'), PrintPage),
 			(re.compile(r'_RealProcPageResult:\d+ : .*ID: (\d+),result: (\w+) reason=([-+]?\d+).*T\((\d+)\)'), RealProcPageResult),
@@ -236,10 +227,10 @@ if __name__ == '__main__':
 	print("\n=== Top 10 longest _waitApiRet calls ===")
 	print("%-8s %-12s %-12s %-10s %s" % ("Rank", "CallApiID", "StartTime", "Duration", "Line"))
 	for idx, (cid, st, dur, ln) in enumerate(_waitApiRetList[:10]):
-		print("%-8d %-12d %-12d %-10d %d" % (idx+1, cid, st, dur, ln))
+		print("%-8d %-12d %-12d %-10d %d" % (idx + 1, cid, st, dur, ln))
 
 	for i, time in _pageIdTime.items():
-		if time != 0 :
+		if time != 0:
 			print("page %d start time %d ms can't stop time" % (i, _pageIdTime[i]))
 
 	print("\n=== Job Line Ranges ===")
@@ -247,6 +238,3 @@ if __name__ == '__main__':
 	for entry in _jobLineRanges:
 		endStr = str(entry['end']) if entry['end'] is not None else "N/A"
 		print("%-6d %-10s %-10d %-10s" % (entry['job'], entry['appType'], entry['start'], endStr))
-
-    
-    

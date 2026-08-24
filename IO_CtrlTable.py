@@ -39,9 +39,14 @@ def CheckMiceOutput(m):
 	sensorId, sensorStatus, m3time, m3UsTime = m.groups()
 	
 	if sensorId not in sensorName2id:
-		sensorName[_curSensorId] = sensorId
-		sensorName2id[sensorId] = _curSensorId
-		_curSensorId += 1
+		while _curSensorId < max_sensor_num and sensorName[_curSensorId] != '':
+			_curSensorId += 1
+		if _curSensorId >= max_sensor_num:
+			sensorName.append(sensorId)
+			sensorName2id[sensorId] = len(sensorName) - 1
+		else:
+			sensorName[_curSensorId] = sensorId
+			sensorName2id[sensorId] = _curSensorId
 
 	if sensorId in sensorName2id:
 		sensorId = sensorName2id[sensorId]

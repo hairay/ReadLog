@@ -1,34 +1,43 @@
 import os
+import argparse
 from docx import Document
 
-# 設定要搜尋的資料夾和目標字串
-folder_path = "X:\Eagle"  # 替換成你的 Word 檔案所在資料夾
-search_text = "201607"
-
-# 搜尋函數
 def search_in_docx(file_path, search_text):
     try:
         doc = Document(file_path)
         for para in doc.paragraphs:
             if search_text in para.text:
-                return True  # 找到即回傳 True
+                return True
     except Exception as e:
         print(f"無法讀取 {file_path}: {e}")
     return False
 
-# 遍歷資料夾中的所有 .docx 文件
-found_files = []
-for filename in os.listdir(folder_path):
-    if filename.endswith(".docx"):
-        file_path = os.path.join(folder_path, filename)
-        if search_in_docx(file_path, search_text):
-            found_files.append(filename)
+def main():
+    parser = argparse.ArgumentParser(description="在 .docx 檔案中搜尋指定字串")
+    parser.add_argument("-d", "--dir", default=r"X:\Eagle", help="搜尋資料夾路徑 (預設: X:\\Eagle)")
+    parser.add_argument("-k", "--keyword", default="201607", help="搜尋目標關鍵字 (預設: 201607)")
+    args = parser.parse_args()
 
-# 輸出搜尋結果
-if found_files:
-    print("找到包含字串的文件:")
-    for file in found_files:
-        print(file)
-else:
-    print("沒有找到符合的文件。")
+    folder_path = args.dir
+    search_text = args.keyword
 
+    if not os.path.exists(folder_path):
+        print(f"錯誤：資料夾不存在: {folder_path}")
+        return
+
+    found_files = []
+    for filename in os.listdir(folder_path):
+        if filename.lower().endswith(".docx"):
+            file_path = os.path.join(folder_path, filename)
+            if search_in_docx(file_path, search_text):
+                found_files.append(filename)
+
+    if found_files:
+        print(f"找到包含 '{search_text}' 的文件:")
+        for file in found_files:
+            print(f"  - {file}")
+    else:
+        print(f"沒有找到包含 '{search_text}' 的文件。")
+
+if __name__ == "__main__":
+    main()

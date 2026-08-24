@@ -1,0 +1,4 @@
+matplotlib>=3.5.0
+numpy>=1.20.0
+pywin32>=300; platform_system == "Windows"
+python-docx>=0.8.11

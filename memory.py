@@ -20,14 +20,17 @@ def ImageClose(m):
 	if iAddr in imageAddr:
 		del imageAddr[iAddr]
 	else:	
-		print("[ %6d ] ImageClose can't fine Addr:%s" % (_lineNum, iAddr))
+		print("[ %6d ] ImageClose can't find Addr:%s" % (_lineNum, iAddr))
 
 def SearchPipePhyMem(addr, size):
 	for key, value in pipePhyAddr2Size.items():
-		start = int(key, 16)
-		end = start + int(value[0])
-		if addr >= start and (addr+size) <= end:
-			return 1
+		try:
+			start = int(key, 16)
+			end = start + int(value[0])
+			if addr >= start and (addr+size) <= end:
+				return 1
+		except (ValueError, TypeError, IndexError):
+			continue
 	return 0
 
 def IPMallocPhy(m):
@@ -172,8 +175,8 @@ if __name__ == '__main__':
 	pipePhyAddr2Size["0x88600000"] = ["6291456", 0]
 
 	SearchLog(sys.stdin, patterns)
-	del pipePhyAddr2Size["0x88000000"]
-	del pipePhyAddr2Size["0x88600000"]
+	pipePhyAddr2Size.pop("0x88000000", None)
+	pipePhyAddr2Size.pop("0x88600000", None)
 
 	for key, value in phyAddr2Size.items():
 		print("need MemMgrFree phyAddr:%s size:%s" % (key, value))

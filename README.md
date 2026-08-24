@@ -67,16 +67,15 @@ type logfile.txt | python vm3_sensor.py       :: 產生 curve.png
 安裝方式：
 
 ```batch
-pip install matplotlib numpy pywin32 python-docx
+pip install -r requirements.log
 ```
 
 ---
 
 ## 注意事項
 
-- **PNG 覆蓋問題**：`vm3_sensor.py`、`mcu_in_out.py`、`vm3_temprature.py` 預設都會寫入目前工作目錄的 `curve.png`。若連續執行而不重新命名，後面會覆蓋前面的圖檔。批次檔已幫你自動 rename/move，請直接使用批次檔。
-- **輸出檔不納入版本控制**：`*.log`、`*.txt`、`*.png`、`*.csv` 皆已在 `.gitignore` 中，只有 `log/` 下已提交的範例外。
-- **專案結構**：目前為扁平式腳本集合，沒有 package/module 架構，也沒有 `pyproject.toml`、`requirements.txt` 或測試框架。
+- **PNG 產生與視窗顯示**：`vm3_sensor.py`、`mcu_in_out.py`、`vm3_temprature.py` 預設產生 `curve.png` 並在背景關閉視窗，不會阻斷批次處理。如需開啟圖形介面檢視，可加上 `--show` 參數。
+- **輸出檔不納入版本控制**：`*.log`、`*.png`、`*.csv` 皆已在 `.gitignore` 中，只有 `log/` 下已提交的範例外。
 - **平台術語**：Log 中常見的 M3/M3P、VM3、Mice、TwinColor、Panther、Riscv 等詞彙，代表不同的印表機平台或韌體分支。
 
 ---

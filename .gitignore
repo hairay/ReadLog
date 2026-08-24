@@ -1,5 +1,28 @@
-debug
+# Log and output files
 *.log
-*.txt
+!requirements.log
 *.png
 *.csv
+debug.log
+debug/
+
+# Text log input files (except committed samples under log/)
+*.txt
+log/*
+!log/*.txt
+
+# Binaries and executables
+*.exe
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Runtime state files
+forward_sent.json
+Print_Job_config.json
+
+# IDE / Editor folders
+.vscode/
+.idea/

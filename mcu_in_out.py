@@ -64,9 +64,12 @@ def CheckMiceSensor(m):
 	_curTime = float(m3time)/1000.0 + _startM3pTime
 
 	if sensorId not in sensorName2id:
+		while _curSensorId < max_sensor_num and sensorName[_curSensorId] != '':
+			_curSensorId += 1
+		if _curSensorId >= max_sensor_num:
+			return None
 		sensorName[_curSensorId] = sensorId
 		sensorName2id[sensorId] = _curSensorId
-		_curSensorId += 1
 
 	if sensorId in sensorName2id:
 		sensorId = sensorName2id[sensorId]
@@ -118,4 +121,7 @@ if __name__ == '__main__':
 	plt.ylabel("sensor pos", fontsize=14)
 	plt.tick_params(axis='both', labelsize=8, color='red')	
 	plt.savefig('curve.png', bbox_inches='tight')
-	plt.show()
+	if '--show' in sys.argv:
+		plt.show()
+	else:
+		plt.close()

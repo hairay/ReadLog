@@ -164,4 +164,7 @@ if __name__ == '__main__':
 	plt.ylabel("sensor pos", fontsize=14)
 	plt.tick_params(axis='both', labelsize=8, color='red')
 	plt.savefig('curve.png', bbox_inches='tight')
-	plt.show()
+	if '--show' in sys.argv:
+		plt.show()
+	else:
+		plt.close()

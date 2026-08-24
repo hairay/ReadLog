@@ -5,6 +5,7 @@
 *.csv
 debug.log
 debug/
+log/
 
 # Text log input files (except committed samples under log/)
 *.txt

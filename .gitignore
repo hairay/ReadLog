@@ -25,3 +25,4 @@ Print_Job_config.json
 # IDE / Editor folders
 .vscode/
 .idea/
+/log

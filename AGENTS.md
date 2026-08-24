@@ -32,7 +32,7 @@ Batch wrappers (`Auto*.bat`, `KeyWord.bat`) iterate over all `*.txt` in `.` and 
 - **win32com + python-docx:** `find_word_doc.py`, `find_word_docx.py`
 - **win32com:** `outlook_forward_service.py`
 
-Install as needed: `pip install -r requirements.txt`
+Install as needed: `pip install -r requirements.log`
 
 ## Scripts that generate PNGs
 
@@ -67,4 +67,4 @@ Install as needed: `pip install -r requirements.txt`
 
 - **1 branch:** `master`
 - **2 remotes:** `origin` (GitLab), `github` (GitHub mirror)
-- **No package/module hierarchy** — flat scripts, no `pyproject.toml`, dependencies in `requirements.txt`
+- **No package/module hierarchy** — flat scripts, no `pyproject.toml`, dependencies in `requirements.log`

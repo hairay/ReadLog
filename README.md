@@ -68,7 +68,7 @@ type logfile.txt | python vm3_sensor.py       :: 產生 curve.png
 安裝方式：
 
 ```batch
-pip install -r requirements.txt
+pip install -r requirements.log
 ```
 
 ---
